@@ -655,7 +655,7 @@ Format your response using markdown: use ### for main section headers, #### for 
                 const data = await response.json();
                 if (data.error) throw new Error(data.error.message);
 
-                const result = data.content?.[0]?.text || '';
+                const result = data.result || '';
 
                 spinner.classList.remove('active');
                 resultLabel.textContent = dirLabel;
