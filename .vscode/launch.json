@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Übersetzer",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/main.py",
+      "cwd": "${workspaceFolder}/backend",
+      "console": "integratedTerminal"
+    }
+  ]
+}
