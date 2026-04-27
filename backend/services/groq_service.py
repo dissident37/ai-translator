@@ -32,8 +32,8 @@ If translating ru-de, apply the same scheme in reverse."""
 
 def translate_text(text: str, direction: str) -> str:
     """
-    Переводит текст через Groq API.
-    direction: 'de-ru' или 'ru-de'
+    Übersetzt Text über die Groq API.
+    direction: 'de-ru' oder 'ru-de'
     """
     if direction == "de-ru":
         user_message = f"Переведи с немецкого на русский:\n\n{text}"

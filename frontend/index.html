@@ -568,7 +568,7 @@ Format your response using markdown: use ### for main section headers, #### for 
             btnRU.textContent = isDeRu ? 'RU' : 'DE';
             btnDE.classList.toggle('active', isDeRu);
             btnRU.classList.toggle('active', !isDeRu);
-            // make both look active in current direction
+            // Beide Schaltflächen als aktiv markieren
             btnDE.classList.add('active');
             btnRU.classList.add('active');
             inputText.placeholder = isDeRu ? 'Deutsches Wort oder Text…' : 'Русское слово или текст…';
@@ -592,10 +592,10 @@ Format your response using markdown: use ### for main section headers, #### for 
         });
 
         function renderMarkdown(text) {
-            // Tables first
+            // Zuerst Tabellen verarbeiten
             let result = text;
 
-            // Process tables
+            // Markdown-Tabellen in HTML umwandeln
             result = result.replace(/(\|.+\|\n)+/g, (tableStr) => {
                 const rows = tableStr.trim().split('\n');
                 if (rows.length < 2) return tableStr;
@@ -616,7 +616,7 @@ Format your response using markdown: use ### for main section headers, #### for 
                 .replace(/^[-•] (.+)$/gm, '<li>$1</li>')
                 .replace(/(<li>.*<\/li>\n?)+/g, block => `<ul>${block}</ul>`);
 
-            // Paragraphs
+            // Absätze erzeugen
             const parts = result.split(/\n\n+/);
             result = parts.map(part => {
                 part = part.trim();
