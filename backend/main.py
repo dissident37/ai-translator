@@ -7,7 +7,7 @@ import uvicorn
 
 app = FastAPI(title="Übersetzer API", version="1.0.0")
 
-# CORS — разрешаем запросы с фронтенда
+# CORS — Anfragen vom Frontend erlauben
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,10 +15,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Подключаем роутер перевода
+# Übersetzungs-Router einbinden
 app.include_router(translate.router, prefix="/api")
 
-# Отдаём фронтенд
+# Frontend als statische Dateien ausliefern
 app.mount("/", StaticFiles(directory="../frontend", html=True), name="frontend")
 
 if __name__ == "__main__":

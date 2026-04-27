@@ -6,7 +6,7 @@ router = APIRouter()
 
 class TranslateRequest(BaseModel):
     text: str
-    direction: str  # 'de-ru' или 'ru-de'
+    direction: str  # 'de-ru' oder 'ru-de'
 
 class TranslateResponse(BaseModel):
     result: str
@@ -14,8 +14,8 @@ class TranslateResponse(BaseModel):
 @router.post("/translate", response_model=TranslateResponse)
 async def translate(request: TranslateRequest):
     """
-    Принимает текст и направление перевода,
-    возвращает переведённый текст.
+    Nimmt Text und Übersetzungsrichtung entgegen,
+    gibt den übersetzten Text zurück.
     """
     if not request.text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")
