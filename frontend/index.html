@@ -521,7 +521,7 @@
         }
 
         function updateCharCount() {
-            charCount.textContent = `${sourceText.length} символов`;
+            charCount.textContent = `${sourceText.trim().length} символов`;
         }
 
         function showError(message) {
@@ -620,21 +620,22 @@
         }
 
         function handleSourceInput() {
-            sourceText = sourceEditor.innerText.replace(/\u00a0/g, ' ').trim();
+            sourceText = sourceEditor.innerText.replace(/\u00a0/g, ' ');
             updateCharCount();
             clearError();
             activeSentenceIndex = null;
-            renderSource(true);
 
             clearTimeout(debounceTimer);
-            if (!sourceText) {
+            if (!sourceText.trim()) {
+                sourceText = '';
+                sourceEditor.innerHTML = '';
                 clearTranslation();
                 return;
             }
 
             debounceTimer = setTimeout(() => {
-                requestTranslation(sourceText);
-            }, 500);
+                requestTranslation(sourceText.trim());
+            }, 900);
         }
 
         async function requestTranslation(text) {
@@ -661,6 +662,7 @@
 
                 translatedText = data.result || '';
                 activeSentenceIndex = null;
+                renderSource();
                 renderTranslation();
             } catch (error) {
                 if (requestId !== requestCounter) return;
