@@ -52,3 +52,19 @@ Der Systemprompt in [groq_service.py](backend/services/groq_service.py) passt di
 
 - `GROQ_API_KEY` — einzige erforderliche Umgebungsvariable (Groq-Konsole)
 - Keine Datenbank, kein persistenter Zustand außer der Groq-API
+
+## Deployment
+
+Die App läuft auf einem IONOS VPS (`translate.konstantinsittner.de`) hinter Nginx als Reverse Proxy auf Port 8001.
+
+```bash
+# Docker-Image bauen und Container starten
+docker compose up -d --build
+
+# Logs prüfen
+docker logs uebersetzer_app
+```
+
+Autodeploy läuft über GitHub Actions (`.github/workflows/deploy.yml`): jeder Push auf `main` löst via SSH `git pull` + `docker compose up -d --build` auf dem Server aus.
+
+Der Einstiegspunkt auf dem Server ist `/srv/translate/`. Das Frontend wird vom Backend als statische Dateien aus `../frontend` (relativ zu `backend/`) ausgeliefert — dieser Pfad funktioniert sowohl lokal als auch im Docker-Container (`WORKDIR /app/backend`).
