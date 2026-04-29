@@ -19,49 +19,253 @@
             --border: #c8bfaa;
             --left-highlight: #fac775;
             --right-highlight: #c0dd97;
+            --sb-open: 256px;
+            --sb-closed: 40px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
             background: var(--paper);
             color: var(--ink);
             font-family: 'IBM Plex Sans', sans-serif;
             font-weight: 300;
             background-image:
-                radial-gradient(ellipse at 10% 20%, rgba(200, 150, 42, 0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 90% 80%, rgba(184, 74, 30, 0.05) 0%, transparent 50%);
+                radial-gradient(ellipse at 10% 20%, rgba(200,150,42,.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(184,74,30,.05) 0%, transparent 50%);
         }
 
-        *:focus-visible {
-            outline: 1px solid var(--gold);
-            outline-offset: 2px;
+        *:focus-visible { outline: 1px solid var(--gold); outline-offset: 2px; }
+
+        /* ── Layout ───────────────────────────────── */
+
+        .app-shell {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ── Sidebar ──────────────────────────────── */
+
+        .sidebar {
+            width: var(--sb-open);
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            background: rgba(237,232,220,.8);
+            backdrop-filter: blur(8px);
+            transition: width .22s ease;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sb-closed);
+        }
+
+        /* навигационная колонка — всегда видна */
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            width: var(--sb-open);  /* фиксированная ширина, не сжимается */
+        }
+
+        /* кнопка-раздел */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            width: 100%;
+            padding: 0.82rem 0 0.82rem 0;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            text-align: left;
+            transition: background .14s, color .14s;
+            border-left: 3px solid transparent;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .nav-item:hover { background: rgba(200,150,42,.07); }
+
+        .nav-item.active {
+            border-left-color: var(--rust);
+            color: var(--rust);
+        }
+
+        /* иконка / сокращение — всегда в первых 40px */
+        .nav-item .nav-short {
+            width: calc(var(--sb-closed) - 3px); /* 3px — border-left */
+            flex-shrink: 0;
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            transition: color .14s;
+        }
+
+        .nav-item.active .nav-short { color: var(--rust); }
+
+        /* полное название — скрыто когда collapsed */
+        .nav-item .nav-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--ink);
+            opacity: 1;
+            transition: opacity .15s;
+        }
+
+        .sidebar.collapsed .nav-item .nav-label { opacity: 0; pointer-events: none; }
+        .sidebar.collapsed .nav-item.active { border-left-color: var(--rust); }
+
+        /* кнопка сворачивания — в верхнем nav-item'е справа */
+        .nav-collapse {
+            margin-left: auto;
+            margin-right: 0.75rem;
+            width: 22px;
+            height: 22px;
+            border: 0.5px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: opacity .15s, color .14s, border-color .14s;
+        }
+
+        .nav-collapse:hover { color: var(--ink); border-color: var(--ink); }
+        .sidebar.collapsed .nav-collapse { opacity: 0; pointer-events: none; }
+
+        .nav-collapse svg {
+            width: 13px;
+            height: 13px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* разделитель между nav и списком */
+        .sidebar-divider {
+            height: 1px;
+            background: var(--border);
+            flex-shrink: 0;
+        }
+
+        /* список записей */
+        .sidebar-list {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            opacity: 1;
+            transition: opacity .15s;
+        }
+
+        .sidebar.collapsed .sidebar-list {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sidebar-empty {
+            padding: 1.2rem 1rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .sidebar-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.55rem 2.2rem 0.55rem 1rem;
+            border: none;
+            border-bottom: 1px solid rgba(200,191,170,.35);
+            background: transparent;
+            cursor: pointer;
+            transition: background .13s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-item:hover { background: rgba(200,150,42,.07); }
+
+        .sidebar-item-text {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--ink);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-item-meta {
+            display: block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.58rem;
+            color: var(--muted);
+            margin-top: 0.15rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-item-star {
+            position: absolute;
+            right: 0.45rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--border);
+            font-size: 0.85rem;
+            padding: 0.15rem;
+            line-height: 1;
+            transition: color .13s;
+        }
+
+        .sidebar-item-star:hover,
+        .sidebar-item-star.starred { color: var(--gold); }
+
+        /* ── Main ─────────────────────────────────── */
+
+        .app-main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
         }
 
         header {
-            padding: 2rem 3rem 1.2rem;
+            padding: 1.3rem 2rem 1rem;
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: baseline;
             gap: 1.5rem;
+            flex-shrink: 0;
         }
 
         .logo {
             font-family: 'Playfair Display', serif;
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 700;
             letter-spacing: -0.02em;
         }
 
-        .logo span {
-            color: var(--rust);
-            font-style: italic;
-        }
+        .logo span { color: var(--rust); font-style: italic; }
 
         .subtitle {
             font-family: 'IBM Plex Mono', monospace;
@@ -72,24 +276,23 @@
         }
 
         .main {
-            max-width: 1180px;
-            margin: 0 auto;
-            padding: 2rem 2rem 3rem;
+            flex: 1;
+            padding: 1.5rem 2rem 2rem;
+            min-width: 0;
         }
 
         .workspace {
             border: 1px solid var(--border);
-            background: rgba(255, 255, 255, 0.52);
+            background: rgba(255,255,255,.52);
             backdrop-filter: blur(6px);
         }
 
-        .top-bar,
-        .bottom-bar {
+        .top-bar, .bottom-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
-            padding: 0.95rem 1.2rem;
+            padding: .95rem 1.2rem;
             border-bottom: 1px solid var(--border);
         }
 
@@ -97,8 +300,8 @@
             border-top: 1px solid var(--border);
             border-bottom: none;
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.68rem;
-            letter-spacing: 0.08em;
+            font-size: .68rem;
+            letter-spacing: .08em;
             text-transform: uppercase;
             color: var(--muted);
         }
@@ -106,39 +309,33 @@
         .badge {
             min-width: 58px;
             text-align: center;
-            padding: 0.4rem 0.85rem;
+            padding: .4rem .85rem;
             border: 1px solid var(--border);
             background: var(--cream);
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.74rem;
-            letter-spacing: 0.12em;
+            font-size: .74rem;
+            letter-spacing: .12em;
             text-transform: uppercase;
             color: var(--ink);
         }
 
-        .swap-btn,
-        .icon-btn {
+        .swap-btn, .icon-btn {
             width: 30px;
             height: 30px;
-            border: 0.5px solid var(--border);
+            border: .5px solid var(--border);
             background: transparent;
             color: var(--muted);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: border-color 0.18s, color 0.18s, background 0.18s;
+            transition: border-color .18s, color .18s, background .18s;
             flex-shrink: 0;
         }
 
-        .swap-btn:hover,
-        .icon-btn:hover {
-            color: var(--ink);
-            border-color: var(--ink);
-        }
+        .swap-btn:hover, .icon-btn:hover { color: var(--ink); border-color: var(--ink); }
 
-        .swap-btn svg,
-        .icon-btn svg {
+        .swap-btn svg, .icon-btn svg {
             width: 16px;
             height: 16px;
             stroke: currentColor;
@@ -148,50 +345,36 @@
             stroke-linejoin: round;
         }
 
-        .icon-btn.recording {
-            color: #fff;
-            background: #b42318;
-            border-color: #b42318;
-        }
+        .icon-btn.recording { color: #fff; background: #b42318; border-color: #b42318; }
+        .icon-btn.fav-active { color: var(--gold); border-color: var(--gold); }
 
         .panels {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-            min-height: 62vh;
+            grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+            min-height: 58vh;
         }
 
-        .panel {
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .panel + .panel {
-            border-left: 1px solid var(--border);
-        }
+        .panel { min-width: 0; display: flex; flex-direction: column; }
+        .panel + .panel { border-left: 1px solid var(--border); }
 
         .panel-head {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
-            padding: 1rem 1.2rem 0.85rem;
-            border-bottom: 1px solid rgba(200, 191, 170, 0.6);
+            padding: 1rem 1.2rem .85rem;
+            border-bottom: 1px solid rgba(200,191,170,.6);
         }
 
         .panel-title {
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.66rem;
-            letter-spacing: 0.16em;
+            font-size: .66rem;
+            letter-spacing: .16em;
             text-transform: uppercase;
             color: var(--muted);
         }
 
-        .panel-tools {
-            display: flex;
-            align-items: center;
-            gap: 0.45rem;
-        }
+        .panel-tools { display: flex; align-items: center; gap: .45rem; }
 
         .panel-scroll {
             flex: 1;
@@ -210,14 +393,8 @@
             color: var(--ink);
         }
 
-        .editor:empty::before {
-            content: attr(data-placeholder);
-            color: var(--muted);
-        }
-
-        .editor:focus {
-            outline: none;
-        }
+        .editor:empty::before { content: attr(data-placeholder); color: var(--muted); }
+        .editor:focus { outline: none; }
 
         .translation-output {
             min-height: 100%;
@@ -228,576 +405,653 @@
             color: var(--ink);
         }
 
-        .translation-output.empty {
-            color: var(--muted);
-            font-style: italic;
-        }
+        .translation-output.empty { color: var(--muted); font-style: italic; }
 
         .sentence {
             display: inline;
             border-radius: 2px;
-            padding: 0.02rem 0.06rem;
+            padding: .02rem .06rem;
             cursor: pointer;
-            transition: background 0.16s ease;
+            transition: background .16s ease;
         }
 
-        .sentence + .sentence {
-            margin-left: 0.12rem;
-        }
+        .sentence + .sentence { margin-left: .12rem; }
+        .sentence.left.active  { background: var(--left-highlight); }
+        .sentence.right.active { background: var(--right-highlight); }
 
-        .sentence.left.active {
-            background: var(--left-highlight);
-        }
-
-        .sentence.right.active {
-            background: var(--right-highlight);
-        }
-
-        .skeleton {
-            display: none;
-            gap: 0.75rem;
-            padding-top: 0.1rem;
-        }
-
-        .skeleton.active {
-            display: grid;
-        }
+        .skeleton { display: none; gap: .75rem; padding-top: .1rem; }
+        .skeleton.active { display: grid; }
 
         .skeleton-line {
             height: 14px;
             border-radius: 999px;
-            background: linear-gradient(90deg, rgba(200, 191, 170, 0.22), rgba(200, 150, 42, 0.36), rgba(200, 191, 170, 0.22));
+            background: linear-gradient(90deg, rgba(200,191,170,.22), rgba(200,150,42,.36), rgba(200,191,170,.22));
             background-size: 200% 100%;
             animation: shimmer 1.2s linear infinite;
         }
 
-        .skeleton-line:nth-child(1) {
-            width: 88%;
-        }
-
-        .skeleton-line:nth-child(2) {
-            width: 63%;
-        }
-
-        .skeleton-line:nth-child(3) {
-            width: 76%;
-        }
+        .skeleton-line:nth-child(1) { width: 88%; }
+        .skeleton-line:nth-child(2) { width: 63%; }
+        .skeleton-line:nth-child(3) { width: 76%; }
 
         @keyframes shimmer {
-            from {
-                background-position: 200% 0;
-            }
-
-            to {
-                background-position: -200% 0;
-            }
+            from { background-position: 200% 0; }
+            to   { background-position: -200% 0; }
         }
 
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.55rem;
-        }
+        .status { display: inline-flex; align-items: center; gap: .55rem; }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 8px; height: 8px;
             border-radius: 50%;
             background: #4b9f47;
-            box-shadow: 0 0 0 3px rgba(75, 159, 71, 0.14);
+            box-shadow: 0 0 0 3px rgba(75,159,71,.14);
         }
 
         .error-msg {
             display: none;
-            margin-top: 0.9rem;
+            margin-top: .9rem;
             color: var(--rust);
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.78rem;
-            padding: 0.8rem 1rem;
-            background: rgba(184, 74, 30, 0.06);
-            border: 1px solid rgba(184, 74, 30, 0.18);
+            font-size: .78rem;
+            padding: .8rem 1rem;
+            background: rgba(184,74,30,.06);
+            border: 1px solid rgba(184,74,30,.18);
         }
 
-        .error-msg.visible {
-            display: block;
-        }
-
-        .hidden {
-            display: none;
-        }
+        .error-msg.visible { display: block; }
+        .hidden { display: none; }
 
         @media (max-width: 768px) {
-            .panels {
-                grid-template-columns: 1fr;
-            }
-
-            .panel + .panel {
-                border-left: none;
-                border-top: 1px solid var(--border);
-            }
+            .panels { grid-template-columns: 1fr; }
+            .panel + .panel { border-left: none; border-top: 1px solid var(--border); }
         }
 
         @media (max-width: 600px) {
-            header {
-                padding: 1.2rem 1rem;
-                flex-direction: column;
-                gap: 0.3rem;
-            }
-
-            .logo {
-                font-size: 1.6rem;
-            }
-
-            .main {
-                padding: 1.2rem 1rem 2rem;
-            }
+            header { padding: 1rem; flex-wrap: wrap; gap: .5rem; }
+            .logo { font-size: 1.5rem; }
+            .main { padding: 1rem 1rem 2rem; }
         }
     </style>
 </head>
 
 <body>
-    <header>
-        <div>
-            <div class="logo">Über<span>setzer</span></div>
-            <div class="subtitle">Deutsch · Russisch — Переводчик</div>
-        </div>
-    </header>
+<div class="app-shell">
 
-    <main class="main">
-        <section class="workspace">
-            <div class="top-bar">
-                <div class="badge" id="sourceBadge">DE</div>
-                <button class="swap-btn" id="swapBtn" title="Сменить направление" aria-label="Сменить направление">
+    <!-- ── Боковая панель ── -->
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <!-- История -->
+            <button class="nav-item active" data-section="history">
+                <span class="nav-short">Ис</span>
+                <span class="nav-label">История</span>
+                <button class="nav-collapse" id="navCollapse" title="Свернуть" aria-label="Свернуть панель">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M4 8h13"></path>
-                        <path d="m13 4 4 4-4 4"></path>
-                        <path d="M20 16H7"></path>
-                        <path d="m11 12-4 4 4 4"></path>
+                        <path d="M15 18l-6-6 6-6"></path>
                     </svg>
                 </button>
-                <div class="badge" id="targetBadge">RU</div>
+            </button>
+            <!-- Избранное -->
+            <button class="nav-item" data-section="favorites">
+                <span class="nav-short">Из</span>
+                <span class="nav-label">Избранное</span>
+            </button>
+            <!-- Словарь -->
+            <button class="nav-item" data-section="dictionary">
+                <span class="nav-short">Сл</span>
+                <span class="nav-label">Словарь</span>
+            </button>
+        </nav>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-list" id="sidebarList"></div>
+    </aside>
+
+    <!-- ── Основной контент ── -->
+    <div class="app-main">
+        <header>
+            <div>
+                <div class="logo">Über<span>setzer</span></div>
+                <div class="subtitle">Deutsch · Russisch — Переводчик</div>
             </div>
+        </header>
 
-            <div class="panels">
-                <section class="panel">
-                    <div class="panel-head">
-                        <div class="panel-title">оригинал</div>
-                        <div class="panel-tools">
-                            <button class="icon-btn" id="copySourceBtn" title="Копировать" aria-label="Копировать оригинал">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <rect x="9" y="9" width="11" height="11" rx="2"></rect>
-                                    <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"></path>
-                                </svg>
-                            </button>
-                            <button class="icon-btn" id="voiceBtn" title="Голосовой ввод" aria-label="Голосовой ввод">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 1 1-6 0V6a3 3 0 0 1 3-3z"></path>
-                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                                    <path d="M12 19v3"></path>
-                                    <path d="M8 22h8"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="panel-scroll" id="sourceScroll">
-                        <div class="editor" id="sourceEditor" contenteditable="true" spellcheck="false"
-                            data-placeholder="Введите текст для перевода..."></div>
-                    </div>
-                </section>
-
-                <section class="panel">
-                    <div class="panel-head">
-                        <div class="panel-title">перевод</div>
-                        <div class="panel-tools" id="targetTools">
-                            <button class="icon-btn hidden" id="copyTargetBtn" title="Копировать" aria-label="Копировать перевод">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <rect x="9" y="9" width="11" height="11" rx="2"></rect>
-                                    <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"></path>
-                                </svg>
-                            </button>
-                            <button class="icon-btn hidden" id="speakBtn" title="Озвучить" aria-label="Озвучить перевод">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M11 5 6 9H3v6h3l5 4V5z"></path>
-                                    <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
-                                    <path d="M18.5 5.5a9 9 0 0 1 0 13"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="panel-scroll" id="targetScroll">
-                        <div class="skeleton" id="skeleton">
-                            <div class="skeleton-line"></div>
-                            <div class="skeleton-line"></div>
-                            <div class="skeleton-line"></div>
-                        </div>
-                        <div class="translation-output empty" id="translationOutput">Перевод появится здесь...</div>
-                    </div>
-                </section>
-            </div>
-
-            <div class="bottom-bar">
-                <div id="charCount">0 символов</div>
-                <div class="status">
-                    <span class="status-dot"></span>
-                    <span>синхронная прокрутка</span>
+        <main class="main">
+            <section class="workspace">
+                <div class="top-bar">
+                    <div class="badge" id="sourceBadge">DE</div>
+                    <button class="swap-btn" id="swapBtn" title="Сменить направление" aria-label="Сменить направление">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 8h13"></path><path d="m13 4 4 4-4 4"></path>
+                            <path d="M20 16H7"></path><path d="m11 12-4 4 4 4"></path>
+                        </svg>
+                    </button>
+                    <div class="badge" id="targetBadge">RU</div>
                 </div>
-            </div>
-        </section>
 
-        <div class="error-msg" id="errorMsg"></div>
-    </main>
+                <div class="panels">
+                    <section class="panel">
+                        <div class="panel-head">
+                            <div class="panel-title">оригинал</div>
+                            <div class="panel-tools">
+                                <button class="icon-btn" id="copySourceBtn" title="Копировать" aria-label="Копировать оригинал">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+                                        <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                                <button class="icon-btn" id="voiceBtn" title="Голосовой ввод" aria-label="Голосовой ввод">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 1 1-6 0V6a3 3 0 0 1 3-3z"></path>
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                        <path d="M12 19v3"></path><path d="M8 22h8"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="panel-scroll" id="sourceScroll">
+                            <div class="editor" id="sourceEditor" contenteditable="true" spellcheck="false"
+                                data-placeholder="Введите текст для перевода..."></div>
+                        </div>
+                    </section>
 
-    <script>
-        const sourceEditor = document.getElementById('sourceEditor');
-        const translationOutput = document.getElementById('translationOutput');
-        const sourceBadge = document.getElementById('sourceBadge');
-        const targetBadge = document.getElementById('targetBadge');
-        const swapBtn = document.getElementById('swapBtn');
-        const copySourceBtn = document.getElementById('copySourceBtn');
-        const copyTargetBtn = document.getElementById('copyTargetBtn');
-        const speakBtn = document.getElementById('speakBtn');
-        const voiceBtn = document.getElementById('voiceBtn');
-        const sourceScroll = document.getElementById('sourceScroll');
-        const targetScroll = document.getElementById('targetScroll');
-        const skeleton = document.getElementById('skeleton');
-        const charCount = document.getElementById('charCount');
-        const errorMsg = document.getElementById('errorMsg');
+                    <section class="panel">
+                        <div class="panel-head">
+                            <div class="panel-title">перевод</div>
+                            <div class="panel-tools" id="targetTools">
+                                <button class="icon-btn hidden" id="favBtn" title="В избранное" aria-label="Добавить в избранное">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
+                                <button class="icon-btn hidden" id="copyTargetBtn" title="Копировать" aria-label="Копировать перевод">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+                                        <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                                <button class="icon-btn hidden" id="speakBtn" title="Озвучить" aria-label="Озвучить перевод">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M11 5 6 9H3v6h3l5 4V5z"></path>
+                                        <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
+                                        <path d="M18.5 5.5a9 9 0 0 1 0 13"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="panel-scroll" id="targetScroll">
+                            <div class="skeleton" id="skeleton">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line"></div>
+                            </div>
+                            <div class="translation-output empty" id="translationOutput">Перевод появится здесь...</div>
+                        </div>
+                    </section>
+                </div>
 
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                <div class="bottom-bar">
+                    <div id="charCount">0 символов</div>
+                    <div class="status">
+                        <span class="status-dot"></span>
+                        <span>синхронная прокрутка</span>
+                    </div>
+                </div>
+            </section>
 
-        let direction = 'de-ru';
-        let sourceText = '';
-        let translatedText = '';
-        let leftSentences = [];
-        let rightSentences = [];
-        let activeSentenceIndex = null;
-        let debounceTimer = null;
-        let recognition = null;
-        let isRecording = false;
-        let syncingScroll = false;
-        let requestCounter = 0;
+            <div class="error-msg" id="errorMsg"></div>
+        </main>
+    </div>
+</div>
 
-        function getSourceLang() {
-            return direction === 'de-ru' ? 'de-DE' : 'ru-RU';
+<script>
+    const sourceEditor    = document.getElementById('sourceEditor');
+    const translationOutput = document.getElementById('translationOutput');
+    const sourceBadge     = document.getElementById('sourceBadge');
+    const targetBadge     = document.getElementById('targetBadge');
+    const swapBtn         = document.getElementById('swapBtn');
+    const copySourceBtn   = document.getElementById('copySourceBtn');
+    const copyTargetBtn   = document.getElementById('copyTargetBtn');
+    const speakBtn        = document.getElementById('speakBtn');
+    const voiceBtn        = document.getElementById('voiceBtn');
+    const favBtn          = document.getElementById('favBtn');
+    const sourceScroll    = document.getElementById('sourceScroll');
+    const targetScroll    = document.getElementById('targetScroll');
+    const skeleton        = document.getElementById('skeleton');
+    const charCount       = document.getElementById('charCount');
+    const errorMsg        = document.getElementById('errorMsg');
+    const sidebar         = document.getElementById('sidebar');
+    const sidebarList     = document.getElementById('sidebarList');
+    const navCollapse     = document.getElementById('navCollapse');
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    let direction          = 'de-ru';
+    let sourceText         = '';
+    let translatedText     = '';
+    let leftSentences      = [];
+    let rightSentences     = [];
+    let activeSentenceIndex = null;
+    let debounceTimer      = null;
+    let recognition        = null;
+    let isRecording        = false;
+    let syncingScroll      = false;
+    let requestCounter     = 0;
+    let activeSection      = 'history';
+    let currentHistoryId   = null;
+
+    /* ── Storage ──────────────────────────────── */
+
+    function storageGet(key) {
+        try { return JSON.parse(localStorage.getItem(key)) || []; }
+        catch { return []; }
+    }
+
+    function storageSet(key, val) {
+        try { localStorage.setItem(key, JSON.stringify(val)); }
+        catch {}
+    }
+
+    function saveToHistory(text, result, dir) {
+        const list = storageGet('ub_history');
+        list.unshift({ id: Date.now(), text, result, dir, ts: Date.now() });
+        storageSet('ub_history', list.slice(0, 50));
+        if (activeSection === 'history') renderSidebarSection('history');
+    }
+
+    function isSingleWord(text) {
+        return text.trim().split(/\s+/).length === 1;
+    }
+
+    function saveToDict(text, result) {
+        const list = storageGet('ub_dictionary');
+        if (list.some(i => i.text.toLowerCase() === text.toLowerCase())) return;
+        list.unshift({ id: Date.now(), text, result, ts: Date.now() });
+        storageSet('ub_dictionary', list.slice(0, 200));
+        if (activeSection === 'dictionary') renderSidebarSection('dictionary');
+    }
+
+    function isFavorited(id) {
+        return storageGet('ub_favorites').some(i => i.id === id);
+    }
+
+    function toggleFavorite(id) {
+        const item = storageGet('ub_history').find(i => i.id === id)
+                  || storageGet('ub_favorites').find(i => i.id === id);
+        if (!item) return;
+
+        const favs = storageGet('ub_favorites');
+        const idx  = favs.findIndex(i => i.id === id);
+        if (idx === -1) favs.unshift({ ...item });
+        else            favs.splice(idx, 1);
+        storageSet('ub_favorites', favs.slice(0, 100));
+
+        renderSidebarSection(activeSection);
+        updateFavBtn();
+    }
+
+    /* ── Sidebar UI ───────────────────────────── */
+
+    function collapseSidebar() {
+        sidebar.classList.add('collapsed');
+    }
+
+    function expandSidebar() {
+        sidebar.classList.remove('collapsed');
+    }
+
+    function setActiveSection(section) {
+        activeSection = section;
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.section === section);
+        });
+        renderSidebarSection(section);
+        expandSidebar();
+    }
+
+    function formatDate(ts) {
+        const d   = new Date(ts);
+        const now = new Date();
+        if (d.toDateString() === now.toDateString()) {
+            return d.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
+        }
+        return d.toLocaleDateString('ru', { day: 'numeric', month: 'short' });
+    }
+
+    function renderSidebarSection(section) {
+        const map      = { history: 'ub_history', favorites: 'ub_favorites', dictionary: 'ub_dictionary' };
+        const emptyMsg = { history: 'История пуста', favorites: 'Нет избранных', dictionary: 'Словарь пуст' };
+        const list     = storageGet(map[section]);
+
+        if (!list.length) {
+            sidebarList.innerHTML = `<div class="sidebar-empty">${emptyMsg[section]}</div>`;
+            return;
         }
 
-        function getTargetLang() {
-            return direction === 'de-ru' ? 'ru-RU' : 'de-DE';
+        sidebarList.innerHTML = list.map(item => {
+            const preview = (item.text || '').slice(0, 52) + (item.text.length > 52 ? '…' : '');
+            const meta    = formatDate(item.ts) + (item.dir ? ' · ' + item.dir : '');
+            const starred = (section !== 'dictionary' && isFavorited(item.id)) ? ' starred' : '';
+            const starBtn = section !== 'dictionary'
+                ? `<button class="sidebar-item-star${starred}" data-id="${item.id}" title="Избранное">★</button>`
+                : '';
+            return `<button class="sidebar-item" data-id="${item.id}" data-section="${section}">
+                        <span class="sidebar-item-text">${escapeHtml(preview)}</span>
+                        <span class="sidebar-item-meta">${escapeHtml(meta)}</span>
+                        ${starBtn}
+                    </button>`;
+        }).join('');
+    }
+
+    function loadItem(id, section) {
+        const map  = { history: 'ub_history', favorites: 'ub_favorites', dictionary: 'ub_dictionary' };
+        const item = storageGet(map[section]).find(i => i.id === id);
+        if (!item) return;
+
+        direction  = item.dir || 'de-ru';
+        sourceText = item.text;
+        translatedText = item.result;
+        updateDirectionUI();
+        sourceEditor.innerText = item.text;
+        renderSource();
+        renderTranslation();
+        updateCharCount();
+        currentHistoryId = id;
+        updateFavBtn();
+    }
+
+    /* ── Fav button ───────────────────────────── */
+
+    function updateFavBtn(id) {
+        if (id !== undefined) currentHistoryId = id;
+        if (!currentHistoryId) return;
+        favBtn.classList.toggle('fav-active', isFavorited(currentHistoryId));
+    }
+
+    /* ── Translation helpers ──────────────────── */
+
+    function getSourceLang() { return direction === 'de-ru' ? 'de-DE' : 'ru-RU'; }
+    function getTargetLang()  { return direction === 'de-ru' ? 'ru-RU' : 'de-DE'; }
+
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function splitIntoSentences(text) {
+        const normalized = text.replace(/\r/g, '').trim();
+        if (!normalized) return [];
+        const chunks = normalized.match(/[^.!?\n]+(?:[.!?]+|$)|[^\n]+/g) || [];
+        return chunks.map(c => c.replace(/\s+/g, ' ').trim()).filter(Boolean);
+    }
+
+    function setCaretToEnd(el) {
+        const range = document.createRange();
+        const sel   = window.getSelection();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+
+    function updateDirectionUI() {
+        sourceBadge.textContent = direction === 'de-ru' ? 'DE' : 'RU';
+        targetBadge.textContent = direction === 'de-ru' ? 'RU' : 'DE';
+        renderSource();
+        renderTranslation();
+    }
+
+    function updateCharCount() {
+        charCount.textContent = `${sourceText.trim().length} символов`;
+    }
+
+    function showError(msg) {
+        errorMsg.textContent = msg;
+        errorMsg.classList.add('visible');
+    }
+
+    function clearError() {
+        errorMsg.classList.remove('visible');
+        errorMsg.textContent = '';
+    }
+
+    function flashButton(btn) {
+        btn.style.background = 'var(--cream)';
+        btn.style.color = 'var(--ink)';
+        setTimeout(() => { btn.style.background = 'transparent'; btn.style.color = ''; }, 900);
+    }
+
+    function setTranslationLoading(isLoading) {
+        skeleton.classList.toggle('active', isLoading);
+        translationOutput.classList.toggle('hidden', isLoading);
+    }
+
+    function updateTargetActions() {
+        const has = Boolean(translatedText.trim());
+        favBtn.classList.toggle('hidden', !has);
+        copyTargetBtn.classList.toggle('hidden', !has);
+        speakBtn.classList.toggle('hidden', !has);
+    }
+
+    function renderSource(preserveCaret = false) {
+        leftSentences = splitIntoSentences(sourceText);
+        if (!sourceText.trim()) { sourceEditor.innerHTML = ''; return; }
+
+        const html = leftSentences.length
+            ? leftSentences.map((s, i) => {
+                const a = i === activeSentenceIndex ? ' active' : '';
+                return `<span class="sentence left${a}" data-index="${i}">${escapeHtml(s)}</span>`;
+            }).join(' ')
+            : escapeHtml(sourceText);
+
+        sourceEditor.innerHTML = html;
+        if (preserveCaret && document.activeElement === sourceEditor) setCaretToEnd(sourceEditor);
+    }
+
+    function renderTranslation() {
+        rightSentences = splitIntoSentences(translatedText);
+        if (!translatedText.trim()) {
+            translationOutput.className = 'translation-output empty';
+            translationOutput.textContent = 'Перевод появится здесь...';
+            updateTargetActions();
+            return;
         }
 
-        function escapeHtml(text) {
-            return text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+        translationOutput.className = 'translation-output';
+        translationOutput.innerHTML = rightSentences.map((s, i) => {
+            const a = i === activeSentenceIndex ? ' active' : '';
+            return `<span class="sentence right${a}" data-index="${i}">${escapeHtml(s)}</span>`;
+        }).join(' ');
+
+        updateTargetActions();
+    }
+
+    function setActiveSentence(index) {
+        activeSentenceIndex = index;
+        document.querySelectorAll('.sentence.left').forEach(n =>
+            n.classList.toggle('active', Number(n.dataset.index) === index));
+        document.querySelectorAll('.sentence.right').forEach(n =>
+            n.classList.toggle('active', Number(n.dataset.index) === index));
+
+        const ln = sourceEditor.querySelector(`.sentence.left[data-index="${index}"]`);
+        const rn = translationOutput.querySelector(`.sentence.right[data-index="${index}"]`);
+        if (ln) ln.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        if (rn) rn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+
+    function clearTranslation() {
+        translatedText   = '';
+        activeSentenceIndex = null;
+        currentHistoryId = null;
+        renderTranslation();
+    }
+
+    function handleSourceInput() {
+        sourceText = sourceEditor.innerText.replace(/ /g, ' ');
+        updateCharCount();
+        clearError();
+        activeSentenceIndex = null;
+
+        clearTimeout(debounceTimer);
+        if (!sourceText.trim()) {
+            sourceText = '';
+            sourceEditor.innerHTML = '';
+            clearTranslation();
+            return;
         }
 
-        function splitIntoSentences(text) {
-            const normalized = text.replace(/\r/g, '').trim();
-            if (!normalized) return [];
+        debounceTimer = setTimeout(() => requestTranslation(sourceText.trim()), 900);
+    }
 
-            const chunks = normalized.match(/[^.!?\n]+(?:[.!?]+|$)|[^\n]+/g) || [];
-            return chunks
-                .map((chunk) => chunk.replace(/\s+/g, ' ').trim())
-                .filter(Boolean);
-        }
+    async function requestTranslation(text) {
+        const requestId = ++requestCounter;
+        setTranslationLoading(true);
+        clearError();
 
-        function setCaretToEnd(element) {
-            const range = document.createRange();
-            const selection = window.getSelection();
-            range.selectNodeContents(element);
-            range.collapse(false);
-            selection.removeAllRanges();
-            selection.addRange(range);
-        }
+        try {
+            const response = await fetch('/api/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, direction })
+            });
 
-        function updateDirectionUI() {
-            sourceBadge.textContent = direction === 'de-ru' ? 'DE' : 'RU';
-            targetBadge.textContent = direction === 'de-ru' ? 'RU' : 'DE';
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || data.error?.message || 'Ошибка перевода.');
+            if (requestId !== requestCounter) return;
+
+            translatedText = data.result || '';
+            activeSentenceIndex = null;
             renderSource();
             renderTranslation();
-        }
 
-        function updateCharCount() {
-            charCount.textContent = `${sourceText.trim().length} символов`;
-        }
+            saveToHistory(text, translatedText, direction);
+            const last = storageGet('ub_history')[0];
+            currentHistoryId = last ? last.id : null;
+            updateFavBtn();
 
-        function showError(message) {
-            errorMsg.textContent = message;
-            errorMsg.classList.add('visible');
-        }
+            if (direction === 'de-ru' && isSingleWord(text)) saveToDict(text, translatedText);
 
-        function clearError() {
-            errorMsg.classList.remove('visible');
-            errorMsg.textContent = '';
-        }
-
-        function flashButton(button) {
-            button.style.background = 'var(--cream)';
-            button.style.color = 'var(--ink)';
-            setTimeout(() => {
-                button.style.background = 'transparent';
-                button.style.color = '';
-            }, 900);
-        }
-
-        function setTranslationLoading(isLoading) {
-            skeleton.classList.toggle('active', isLoading);
-            translationOutput.classList.toggle('hidden', isLoading);
-        }
-
-        function updateTargetActions() {
-            const hasTranslation = Boolean(translatedText.trim());
-            copyTargetBtn.classList.toggle('hidden', !hasTranslation);
-            speakBtn.classList.toggle('hidden', !hasTranslation);
-        }
-
-        function renderSource(preserveCaret = false) {
-            leftSentences = splitIntoSentences(sourceText);
-
-            if (!sourceText.trim()) {
-                sourceEditor.innerHTML = '';
-                sourceEditor.dataset.placeholder = 'Введите текст для перевода...';
-                return;
-            }
-
-            const html = leftSentences.length
-                ? leftSentences.map((sentence, index) => {
-                    const active = index === activeSentenceIndex ? ' active' : '';
-                    return `<span class="sentence left${active}" data-index="${index}">${escapeHtml(sentence)}</span>`;
-                }).join(' ')
-                : escapeHtml(sourceText);
-
-            sourceEditor.innerHTML = html;
-
-            if (preserveCaret && document.activeElement === sourceEditor) {
-                setCaretToEnd(sourceEditor);
-            }
-        }
-
-        function renderTranslation() {
-            rightSentences = splitIntoSentences(translatedText);
-
-            if (!translatedText.trim()) {
-                translationOutput.className = 'translation-output empty';
-                translationOutput.textContent = 'Перевод появится здесь...';
-                updateTargetActions();
-                return;
-            }
-
-            translationOutput.className = 'translation-output';
-            translationOutput.innerHTML = rightSentences.map((sentence, index) => {
-                const active = index === activeSentenceIndex ? ' active' : '';
-                return `<span class="sentence right${active}" data-index="${index}">${escapeHtml(sentence)}</span>`;
-            }).join(' ');
-
-            updateTargetActions();
-        }
-
-        function setActiveSentence(index) {
-            activeSentenceIndex = index;
-
-            document.querySelectorAll('.sentence.left').forEach((node) => {
-                node.classList.toggle('active', Number(node.dataset.index) === index);
-            });
-
-            document.querySelectorAll('.sentence.right').forEach((node) => {
-                node.classList.toggle('active', Number(node.dataset.index) === index);
-            });
-
-            const leftNode = sourceEditor.querySelector(`.sentence.left[data-index="${index}"]`);
-            const rightNode = translationOutput.querySelector(`.sentence.right[data-index="${index}"]`);
-            if (leftNode) leftNode.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-            if (rightNode) rightNode.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        }
-
-        function clearTranslation() {
+        } catch (error) {
+            if (requestId !== requestCounter) return;
             translatedText = '';
-            activeSentenceIndex = null;
             renderTranslation();
+            showError('Ошибка: ' + (error.message || 'Не удалось выполнить перевод.'));
+        } finally {
+            if (requestId === requestCounter) setTranslationLoading(false);
         }
+    }
 
-        function handleSourceInput() {
-            sourceText = sourceEditor.innerText.replace(/\u00a0/g, ' ');
+    function syncScroll(from, to) {
+        if (syncingScroll) return;
+        syncingScroll = true;
+        const mf = from.scrollHeight - from.clientHeight;
+        const mt = to.scrollHeight - to.clientHeight;
+        to.scrollTop = mf > 0 ? (from.scrollTop / mf) * (mt > 0 ? mt : 0) : 0;
+        requestAnimationFrame(() => { syncingScroll = false; });
+    }
+
+    function toggleVoiceInput() {
+        if (!SpeechRecognition) { showError('Голосовой ввод не поддерживается.'); return; }
+        if (isRecording && recognition) { recognition.stop(); return; }
+
+        recognition = new SpeechRecognition();
+        recognition.lang = getSourceLang();
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart  = () => { isRecording = true; voiceBtn.classList.add('recording'); clearError(); };
+        recognition.onresult = e  => {
+            sourceText = Array.from(e.results).map(r => r[0].transcript).join('').trim();
+            renderSource(true);
             updateCharCount();
-            clearError();
-            activeSentenceIndex = null;
+        };
+        recognition.onerror  = e  => { if (e.error !== 'aborted') showError('Ошибка голосового ввода: ' + e.error); };
+        recognition.onend    = () => { isRecording = false; voiceBtn.classList.remove('recording'); recognition = null; handleSourceInput(); };
+        recognition.start();
+    }
 
-            clearTimeout(debounceTimer);
-            if (!sourceText.trim()) {
-                sourceText = '';
-                sourceEditor.innerHTML = '';
-                clearTranslation();
-                return;
-            }
+    function speakTranslation() {
+        if (!translatedText.trim()) return;
+        if (!window.speechSynthesis) { showError('Озвучивание не поддерживается.'); return; }
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(translatedText);
+        u.lang = getTargetLang();
+        window.speechSynthesis.speak(u);
+    }
 
-            debounceTimer = setTimeout(() => {
-                requestTranslation(sourceText.trim());
-            }, 900);
-        }
+    /* ── Events ───────────────────────────────── */
 
-        async function requestTranslation(text) {
-            const requestId = ++requestCounter;
-            setTranslationLoading(true);
-            clearError();
+    sourceEditor.addEventListener('input', handleSourceInput);
+    sourceEditor.addEventListener('paste', () => requestAnimationFrame(handleSourceInput));
 
-            try {
-                const response = await fetch('/api/translate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text,
-                        direction
-                    })
-                });
+    sourceEditor.addEventListener('click', e => {
+        const s = e.target.closest('.sentence.left');
+        if (s) setActiveSentence(Number(s.dataset.index));
+    });
 
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(data.detail || data.error?.message || 'Не удалось выполнить перевод.');
-                }
+    translationOutput.addEventListener('click', e => {
+        const s = e.target.closest('.sentence.right');
+        if (s) setActiveSentence(Number(s.dataset.index));
+    });
 
-                if (requestId !== requestCounter) return;
+    sourceScroll.addEventListener('scroll', () => syncScroll(sourceScroll, targetScroll));
+    targetScroll.addEventListener('scroll', () => syncScroll(targetScroll, sourceScroll));
 
-                translatedText = data.result || '';
-                activeSentenceIndex = null;
-                renderSource();
-                renderTranslation();
-            } catch (error) {
-                if (requestId !== requestCounter) return;
-                translatedText = '';
-                renderTranslation();
-                showError('Ошибка: ' + (error.message || 'Не удалось выполнить перевод.'));
-            } finally {
-                if (requestId === requestCounter) {
-                    setTranslationLoading(false);
-                }
-            }
-        }
-
-        function syncScroll(from, to) {
-            if (syncingScroll) return;
-            syncingScroll = true;
-
-            const maxFrom = from.scrollHeight - from.clientHeight;
-            const maxTo = to.scrollHeight - to.clientHeight;
-            const ratio = maxFrom > 0 ? from.scrollTop / maxFrom : 0;
-            to.scrollTop = maxTo > 0 ? ratio * maxTo : 0;
-
-            requestAnimationFrame(() => {
-                syncingScroll = false;
-            });
-        }
-
-        function toggleVoiceInput() {
-            if (!SpeechRecognition) {
-                showError('Голосовой ввод не поддерживается в этом браузере.');
-                return;
-            }
-
-            if (isRecording && recognition) {
-                recognition.stop();
-                return;
-            }
-
-            recognition = new SpeechRecognition();
-            recognition.lang = getSourceLang();
-            recognition.interimResults = true;
-            recognition.maxAlternatives = 1;
-
-            recognition.onstart = () => {
-                isRecording = true;
-                voiceBtn.classList.add('recording');
-                clearError();
-            };
-
-            recognition.onresult = (event) => {
-                const transcript = Array.from(event.results)
-                    .map((result) => result[0].transcript)
-                    .join('');
-                sourceText = transcript.trim();
-                renderSource(true);
-                updateCharCount();
-            };
-
-            recognition.onerror = (event) => {
-                if (event.error !== 'aborted') {
-                    showError('Ошибка голосового ввода: ' + event.error);
-                }
-            };
-
-            recognition.onend = () => {
-                isRecording = false;
-                voiceBtn.classList.remove('recording');
-                recognition = null;
-                handleSourceInput();
-            };
-
-            recognition.start();
-        }
-
-        function speakTranslation() {
-            if (!translatedText.trim()) return;
-
-            if (!window.speechSynthesis) {
-                showError('Озвучивание не поддерживается в этом браузере.');
-                return;
-            }
-
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(translatedText);
-            utterance.lang = getTargetLang();
-            window.speechSynthesis.speak(utterance);
-        }
-
-        sourceEditor.addEventListener('input', handleSourceInput);
-        sourceEditor.addEventListener('paste', () => {
-            requestAnimationFrame(handleSourceInput);
-        });
-
-        sourceEditor.addEventListener('click', (event) => {
-            const sentence = event.target.closest('.sentence.left');
-            if (!sentence) return;
-            setActiveSentence(Number(sentence.dataset.index));
-        });
-
-        translationOutput.addEventListener('click', (event) => {
-            const sentence = event.target.closest('.sentence.right');
-            if (!sentence) return;
-            setActiveSentence(Number(sentence.dataset.index));
-        });
-
-        sourceScroll.addEventListener('scroll', () => syncScroll(sourceScroll, targetScroll));
-        targetScroll.addEventListener('scroll', () => syncScroll(targetScroll, sourceScroll));
-
-        swapBtn.addEventListener('click', () => {
-            direction = direction === 'de-ru' ? 'ru-de' : 'de-ru';
-            updateDirectionUI();
-            if (sourceText.trim()) {
-                requestTranslation(sourceText);
-            }
-        });
-
-        copySourceBtn.addEventListener('click', async () => {
-            if (!sourceText.trim()) return;
-            await navigator.clipboard.writeText(sourceText);
-            flashButton(copySourceBtn);
-        });
-
-        copyTargetBtn.addEventListener('click', async () => {
-            if (!translatedText.trim()) return;
-            await navigator.clipboard.writeText(translatedText);
-            flashButton(copyTargetBtn);
-        });
-
-        voiceBtn.addEventListener('click', toggleVoiceInput);
-        speakBtn.addEventListener('click', speakTranslation);
-
+    swapBtn.addEventListener('click', () => {
+        direction = direction === 'de-ru' ? 'ru-de' : 'de-ru';
         updateDirectionUI();
-        updateCharCount();
-        renderTranslation();
-    </script>
-</body>
+        if (sourceText.trim()) requestTranslation(sourceText);
+    });
 
+    copySourceBtn.addEventListener('click', async () => {
+        if (!sourceText.trim()) return;
+        await navigator.clipboard.writeText(sourceText);
+        flashButton(copySourceBtn);
+    });
+
+    copyTargetBtn.addEventListener('click', async () => {
+        if (!translatedText.trim()) return;
+        await navigator.clipboard.writeText(translatedText);
+        flashButton(copyTargetBtn);
+    });
+
+    voiceBtn.addEventListener('click', toggleVoiceInput);
+    speakBtn.addEventListener('click', speakTranslation);
+
+    favBtn.addEventListener('click', () => {
+        if (!currentHistoryId) return;
+        toggleFavorite(currentHistoryId);
+    });
+
+    /* кнопка ◀ — только она, не всплывает на nav-item */
+    navCollapse.addEventListener('click', e => {
+        e.stopPropagation();
+        collapseSidebar();
+    });
+
+    /* клик на nav-item: раскрыть + переключить раздел */
+    document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => setActiveSection(btn.dataset.section));
+    });
+
+    /* клик на список: загрузить запись или переключить звёздочку */
+    sidebarList.addEventListener('click', e => {
+        const star = e.target.closest('.sidebar-item-star');
+        if (star) {
+            e.stopPropagation();
+            toggleFavorite(Number(star.dataset.id));
+            return;
+        }
+        const item = e.target.closest('.sidebar-item');
+        if (item) loadItem(Number(item.dataset.id), item.dataset.section);
+    });
+
+    /* ── Init ─────────────────────────────────── */
+
+    updateDirectionUI();
+    updateCharCount();
+    renderTranslation();
+    renderSidebarSection('history');
+</script>
+</body>
 </html>

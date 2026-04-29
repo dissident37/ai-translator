@@ -24,11 +24,15 @@ Es gibt keine Tests und kein Linting-Setup.
 
 **Backend** (`backend/`): FastAPI-App, die das Frontend als statische Dateien ausliefert.
 
-- [backend/main.py](backend/main.py) — Einstiegspunkt: CORS (alle Origins), statische Dateien aus `../frontend`, uvicorn mit `reload=True`
+- [backend/main.py](backend/main.py) — Einstiegspunkt: CORS (alle Origins), statische Dateien aus `../frontend`, uvicorn ohne reload (Produktion)
 - [backend/routers/translate.py](backend/routers/translate.py) — `POST /api/translate`; validiert `text` (nicht leer) und `direction` (`de-ru` | `ru-de`)
 - [backend/services/groq_service.py](backend/services/groq_service.py) — Groq-Client; ruft `llama-3.3-70b-versatile` mit temperature 0.3, max 2048 Tokens auf
 
-**Frontend** (`frontend/index.html`): Einzelne HTML-Datei, kein Build-Schritt. Enthält eingebettetes CSS und JS mit eigenem Markdown-Parser, Übersetzungshistorie (localStorage, max. 20 Einträge) und Ctrl+Enter-Shortcut.
+**Frontend** (`frontend/index.html`): Einzelne HTML-Datei, kein Build-Schritt. Enthält eingebettetes CSS und JS mit:
+- Satzweise Synchronisierung (Highlighting + Scroll) zwischen Quelle und Übersetzung
+- Einklappbare Seitenleiste (256px ↔ 40px) mit drei Bereichen: Historie (`ub_history`, max. 50), Favoriten (`ub_favorites`, max. 100), Wörterbuch (`ub_dictionary`, max. 200) — alles in `localStorage`
+- Wörterbuch wird automatisch befüllt wenn ein einzelnes deutsches Wort übersetzt wird
+- Spracherkennung (Web Speech API) und Sprachausgabe
 
 ## API
 
