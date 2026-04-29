@@ -1,154 +1,216 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Übersetzer · DE ↔ RU</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400&family=IBM+Plex+Sans:wght@300;400;500&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ink: #1a1208;
-            --paper: #f5f0e8;
-            --cream: #ede8dc;
-            --rust: #b84a1e;
-            --gold: #c8962a;
-            --muted: #7a7060;
-            --border: #c8bfaa;
-            --left-highlight: #fac775;
-            --right-highlight: #c0dd97;
-            --sb-open: 256px;
-            --sb-closed: 40px;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --border: #e9ecef;
+            --text: #212529;
+            --muted: #6c757d;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --accent-light: #eff6ff;
+            --danger: #dc2626;
+            --sidebar-w: 60px;
+            --header-h: 52px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            background: var(--bg);
             height: 100vh;
             overflow: hidden;
-            background: var(--paper);
-            color: var(--ink);
-            font-family: 'IBM Plex Sans', sans-serif;
-            font-weight: 300;
-            background-image:
-                radial-gradient(ellipse at 10% 20%, rgba(200,150,42,.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 90% 80%, rgba(184,74,30,.05) 0%, transparent 50%);
         }
 
-        *:focus-visible { outline: 1px solid var(--gold); outline-offset: 2px; }
+        /* ── App shell ───────────────────────────── */
 
-        /* ── Layout ───────────────────────────────── */
-
-        .app-shell {
+        .app {
             display: flex;
             height: 100vh;
-            overflow: hidden;
         }
 
-        /* ── Sidebar ──────────────────────────────── */
+        /* ── Sidebar ─────────────────────────────── */
 
         .sidebar {
-            width: var(--sb-open);
+            width: var(--sidebar-w);
             flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
+            background: var(--surface);
             border-right: 1px solid var(--border);
-            background: rgba(237,232,220,.8);
-            backdrop-filter: blur(8px);
-            transition: width .22s ease;
-            overflow: hidden;
-        }
-
-        .sidebar.collapsed {
-            width: var(--sb-closed);
-        }
-
-        /* навигационная колонка — всегда видна */
-        .sidebar-nav {
             display: flex;
             flex-direction: column;
-            flex-shrink: 0;
-            width: var(--sb-open);  /* фиксированная ширина, не сжимается */
+            align-items: center;
+            padding: 12px 0;
+            gap: 4px;
+            z-index: 10;
         }
 
-        /* кнопка-раздел */
-        .nav-item {
+        .sidebar-logo {
+            width: 36px;
+            height: 36px;
+            background: var(--accent);
+            border-radius: 8px;
             display: flex;
             align-items: center;
-            gap: 0.7rem;
-            width: 100%;
-            padding: 0.82rem 0 0.82rem 0;
+            justify-content: center;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-logo svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .nav-btn {
+            width: 40px;
+            height: 40px;
             border: none;
             background: transparent;
-            cursor: pointer;
-            text-align: left;
-            transition: background .14s, color .14s;
-            border-left: 3px solid transparent;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-
-        .nav-item:hover { background: rgba(200,150,42,.07); }
-
-        .nav-item.active {
-            border-left-color: var(--rust);
-            color: var(--rust);
-        }
-
-        /* иконка / сокращение — всегда в первых 40px */
-        .nav-item .nav-short {
-            width: calc(var(--sb-closed) - 3px); /* 3px — border-left */
-            flex-shrink: 0;
-            text-align: center;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.6rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--muted);
-            transition: color .14s;
-        }
-
-        .nav-item.active .nav-short { color: var(--rust); }
-
-        /* полное название — скрыто когда collapsed */
-        .nav-item .nav-label {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.7rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--ink);
-            opacity: 1;
-            transition: opacity .15s;
-        }
-
-        .sidebar.collapsed .nav-item .nav-label { opacity: 0; pointer-events: none; }
-        .sidebar.collapsed .nav-item.active { border-left-color: var(--rust); }
-
-        /* кнопка сворачивания — в верхнем nav-item'е справа */
-        .nav-collapse {
-            margin-left: auto;
-            margin-right: 0.75rem;
-            width: 22px;
-            height: 22px;
-            border: 0.5px solid var(--border);
-            background: transparent;
-            color: var(--muted);
-            display: inline-flex;
+            border-radius: 8px;
+            display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            flex-shrink: 0;
-            transition: opacity .15s, color .14s, border-color .14s;
+            color: var(--muted);
+            transition: background .15s, color .15s;
+            position: relative;
         }
 
-        .nav-collapse:hover { color: var(--ink); border-color: var(--ink); }
-        .sidebar.collapsed .nav-collapse { opacity: 0; pointer-events: none; }
+        .nav-btn:hover {
+            background: var(--bg);
+            color: var(--text);
+        }
 
-        .nav-collapse svg {
-            width: 13px;
-            height: 13px;
+        .nav-btn.active {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .nav-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .nav-btn[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            left: calc(100% + 10px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1e293b;
+            color: #fff;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .nav-spacer { flex: 1; }
+
+        /* ── App body ────────────────────────────── */
+
+        .app-body {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ── Header ──────────────────────────────── */
+
+        header {
+            height: var(--header-h);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        .header-logo {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.02em;
+            margin-right: 8px;
+        }
+
+        .header-logo span { color: var(--accent); }
+
+        .header-langs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 auto;
+        }
+
+        .lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color .15s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .lang-btn:hover { border-color: #adb5bd; }
+
+        .lang-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--muted);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .swap-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--muted);
+            transition: border-color .15s, color .15s;
+        }
+
+        .swap-btn:hover { border-color: #adb5bd; color: var(--text); }
+
+        .swap-btn svg {
+            width: 16px;
+            height: 16px;
             stroke: currentColor;
             fill: none;
             stroke-width: 2;
@@ -156,186 +218,182 @@
             stroke-linejoin: round;
         }
 
-        /* разделитель между nav и списком */
-        .sidebar-divider {
-            height: 1px;
-            background: var(--border);
-            flex-shrink: 0;
-        }
-
-        /* список записей */
-        .sidebar-list {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            opacity: 1;
-            transition: opacity .15s;
-        }
-
-        .sidebar.collapsed .sidebar-list {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .sidebar-empty {
-            padding: 1.2rem 1rem;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.65rem;
-            color: var(--muted);
-            font-style: italic;
-        }
-
-        .sidebar-item {
-            display: block;
-            width: 100%;
-            text-align: left;
-            padding: 0.55rem 2.2rem 0.55rem 1rem;
-            border: none;
-            border-bottom: 1px solid rgba(200,191,170,.35);
-            background: transparent;
-            cursor: pointer;
-            transition: background .13s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .sidebar-item:hover { background: rgba(200,150,42,.07); }
-
-        .sidebar-item-text {
-            display: block;
-            font-size: 0.8rem;
-            color: var(--ink);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .sidebar-item-meta {
-            display: block;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.58rem;
-            color: var(--muted);
-            margin-top: 0.15rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .sidebar-item-star {
-            position: absolute;
-            right: 0.45rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            color: var(--border);
-            font-size: 0.85rem;
-            padding: 0.15rem;
-            line-height: 1;
-            transition: color .13s;
-        }
-
-        .sidebar-item-star:hover,
-        .sidebar-item-star.starred { color: var(--gold); }
-
-        /* ── Main ─────────────────────────────────── */
-
-        .app-main {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        header {
-            padding: 1.3rem 2rem 1rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: baseline;
-            gap: 1.5rem;
-            flex-shrink: 0;
-        }
-
-        .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .logo span { color: var(--rust); font-style: italic; }
-
-        .subtitle {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.68rem;
-            color: var(--muted);
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-        }
-
-        .main {
-            flex: 1;
-            padding: 1.5rem 2rem 2rem;
-            min-width: 0;
-        }
-
-        .workspace {
-            border: 1px solid var(--border);
-            background: rgba(255,255,255,.52);
-            backdrop-filter: blur(6px);
-        }
-
-        .top-bar, .bottom-bar {
+        .header-actions {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            padding: .95rem 1.2rem;
-            border-bottom: 1px solid var(--border);
+            gap: 4px;
         }
 
-        .bottom-bar {
-            border-top: 1px solid var(--border);
-            border-bottom: none;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: .68rem;
-            letter-spacing: .08em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .badge {
-            min-width: 58px;
-            text-align: center;
-            padding: .4rem .85rem;
-            border: 1px solid var(--border);
-            background: var(--cream);
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: .74rem;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            color: var(--ink);
-        }
-
-        .swap-btn, .icon-btn {
-            width: 30px;
-            height: 30px;
-            border: .5px solid var(--border);
+        .hdr-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
             background: transparent;
-            color: var(--muted);
-            display: inline-flex;
+            border-radius: 6px;
+            display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: border-color .18s, color .18s, background .18s;
-            flex-shrink: 0;
+            color: var(--muted);
+            transition: background .15s, color .15s;
         }
 
-        .swap-btn:hover, .icon-btn:hover { color: var(--ink); border-color: var(--ink); }
+        .hdr-btn:hover { background: var(--bg); color: var(--text); }
 
-        .swap-btn svg, .icon-btn svg {
+        .hdr-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* ── Content ─────────────────────────────── */
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px 40px;
+        }
+
+        /* ── Translation panels ──────────────────── */
+
+        .panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            min-height: 180px;
+        }
+
+        .panel + .panel {
+            border-left: 1px solid var(--border);
+        }
+
+        .panel-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px 8px;
+        }
+
+        .panel-lang {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+        }
+
+        .panel-clear {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--muted);
+            transition: background .13s, color .13s;
+        }
+
+        .panel-clear:hover { background: var(--bg); color: var(--text); }
+
+        .panel-clear svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        .panel-body {
+            flex: 1;
+            padding: 4px 16px 12px;
+        }
+
+        .editor {
+            width: 100%;
+            min-height: 100px;
+            font-size: 22px;
+            font-weight: 400;
+            line-height: 1.4;
+            color: var(--text);
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            word-break: break-word;
+        }
+
+        .editor:empty::before {
+            content: attr(data-placeholder);
+            color: #ced4da;
+            font-weight: 300;
+        }
+
+        .translation-text {
+            font-size: 22px;
+            font-weight: 500;
+            line-height: 1.4;
+            color: var(--text);
+            min-height: 100px;
+        }
+
+        .translation-text.empty {
+            color: #ced4da;
+            font-weight: 300;
+            font-size: 18px;
+        }
+
+        .translation-note {
+            margin-top: 6px;
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        .panel-bottom {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            padding: 8px 12px 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .panel-char-count {
+            font-size: 12px;
+            color: var(--muted);
+            margin-left: auto;
+        }
+
+        .icon-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--muted);
+            transition: background .13s, color .13s;
+        }
+
+        .icon-btn:hover { background: var(--bg); color: var(--text); }
+        .icon-btn.active { color: var(--accent); }
+        .icon-btn.fav-on { color: #f59e0b; }
+
+        .icon-btn svg {
             width: 16px;
             height: 16px;
             stroke: currentColor;
@@ -345,302 +403,465 @@
             stroke-linejoin: round;
         }
 
-        .icon-btn.recording { color: #fff; background: #b42318; border-color: #b42318; }
-        .icon-btn.fav-active { color: var(--gold); border-color: var(--gold); }
+        .icon-btn.recording { color: var(--danger); }
 
-        .panels {
-            display: grid;
-            grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-            min-height: 58vh;
+        /* skeleton в панели перевода */
+        .panel-skeleton {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            padding: 4px 0;
         }
 
-        .panel { min-width: 0; display: flex; flex-direction: column; }
-        .panel + .panel { border-left: 1px solid var(--border); }
+        .panel-skeleton.active { display: flex; }
 
-        .panel-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            padding: 1rem 1.2rem .85rem;
-            border-bottom: 1px solid rgba(200,191,170,.6);
-        }
-
-        .panel-title {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: .66rem;
-            letter-spacing: .16em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .panel-tools { display: flex; align-items: center; gap: .45rem; }
-
-        .panel-scroll {
-            flex: 1;
-            min-height: 0;
-            overflow-y: auto;
-            padding: 1.25rem 1.2rem 1.5rem;
-            scrollbar-gutter: stable;
-        }
-
-        .editor {
-            min-height: 100%;
-            white-space: pre-wrap;
-            word-break: break-word;
-            line-height: 1.75;
-            font-size: 1rem;
-            color: var(--ink);
-        }
-
-        .editor:empty::before { content: attr(data-placeholder); color: var(--muted); }
-        .editor:focus { outline: none; }
-
-        .translation-output {
-            min-height: 100%;
-            white-space: pre-wrap;
-            word-break: break-word;
-            line-height: 1.75;
-            font-size: 1rem;
-            color: var(--ink);
-        }
-
-        .translation-output.empty { color: var(--muted); font-style: italic; }
-
-        .sentence {
-            display: inline;
-            border-radius: 2px;
-            padding: .02rem .06rem;
-            cursor: pointer;
-            transition: background .16s ease;
-        }
-
-        .sentence + .sentence { margin-left: .12rem; }
-        .sentence.left.active  { background: var(--left-highlight); }
-        .sentence.right.active { background: var(--right-highlight); }
-
-        .skeleton { display: none; gap: .75rem; padding-top: .1rem; }
-        .skeleton.active { display: grid; }
-
-        .skeleton-line {
+        .skel-line {
             height: 14px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, rgba(200,191,170,.22), rgba(200,150,42,.36), rgba(200,191,170,.22));
+            border-radius: 6px;
+            background: linear-gradient(90deg, #f1f3f5, #e9ecef, #f1f3f5);
             background-size: 200% 100%;
-            animation: shimmer 1.2s linear infinite;
+            animation: skel 1.2s linear infinite;
         }
 
-        .skeleton-line:nth-child(1) { width: 88%; }
-        .skeleton-line:nth-child(2) { width: 63%; }
-        .skeleton-line:nth-child(3) { width: 76%; }
+        .skel-line:nth-child(1) { width: 70%; height: 22px; border-radius: 4px; }
+        .skel-line:nth-child(2) { width: 45%; }
 
-        @keyframes shimmer {
+        @keyframes skel {
             from { background-position: 200% 0; }
             to   { background-position: -200% 0; }
         }
 
-        .status { display: inline-flex; align-items: center; gap: .55rem; }
+        /* ── Translate button ────────────────────── */
 
-        .status-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: #4b9f47;
-            box-shadow: 0 0 0 3px rgba(75,159,71,.14);
+        .translate-row {
+            display: flex;
+            justify-content: center;
+            margin: 16px 0;
         }
+
+        .translate-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 28px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .translate-btn:hover { background: var(--accent-hover); }
+
+        .translate-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* ── Error ───────────────────────────────── */
 
         .error-msg {
             display: none;
-            margin-top: .9rem;
-            color: var(--rust);
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: .78rem;
-            padding: .8rem 1rem;
-            background: rgba(184,74,30,.06);
-            border: 1px solid rgba(184,74,30,.18);
+            padding: 10px 14px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            color: var(--danger);
+            font-size: 13px;
+            margin-bottom: 16px;
         }
 
         .error-msg.visible { display: block; }
-        .hidden { display: none; }
+
+        /* ── Analysis grid ───────────────────────── */
+
+        .analysis {
+            display: none;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .analysis.visible { display: grid; }
+
+        .block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .block-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        /* Блок 1: тип + слово */
+        .type-chip {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--accent-light);
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .block-word {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        /* Блок 2: перевод */
+        .block-translation {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .block-note {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* Блок 3: примеры */
+        .example-item {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .example-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .example-item:first-child { padding-top: 0; }
+
+        .example-num {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 600;
+            margin-top: 2px;
+            flex-shrink: 0;
+            width: 14px;
+        }
+
+        .example-texts { flex: 1; }
+
+        .example-de {
+            font-size: 13px;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .example-ru {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .example-speak {
+            flex-shrink: 0;
+            width: 26px;
+            height: 26px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--muted);
+            transition: background .12s, color .12s;
+        }
+
+        .example-speak:hover { background: var(--bg); color: var(--text); }
+
+        .example-speak svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Блок 4: таблица форм */
+        .forms-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .forms-table tr { border-bottom: 1px solid var(--border); }
+        .forms-table tr:last-child { border-bottom: none; }
+
+        .forms-table td {
+            padding: 7px 0;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        .forms-table td:first-child {
+            color: var(--muted);
+            width: 90px;
+            flex-shrink: 0;
+        }
+
+        .forms-table td:last-child {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Блок 5: синонимы */
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .chip {
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        /* Блок 6: лингвистика */
+        .linguistic-text {
+            font-size: 13px;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Блок: существительное (род/мн.ч.) */
+        .noun-row {
+            display: flex;
+            gap: 24px;
+        }
+
+        .noun-field-label {
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .noun-field-value {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        /* ── Responsive ──────────────────────────── */
 
         @media (max-width: 768px) {
             .panels { grid-template-columns: 1fr; }
             .panel + .panel { border-left: none; border-top: 1px solid var(--border); }
+            .content { padding: 12px 12px 40px; }
+            .analysis { grid-template-columns: 1fr; }
+            .header-logo { display: none; }
         }
 
-        @media (max-width: 600px) {
-            header { padding: 1rem; flex-wrap: wrap; gap: .5rem; }
-            .logo { font-size: 1.5rem; }
-            .main { padding: 1rem 1rem 2rem; }
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
-
 <body>
-<div class="app-shell">
+<div class="app">
 
-    <!-- ── Боковая панель ── -->
-    <aside class="sidebar" id="sidebar">
-        <nav class="sidebar-nav">
-            <!-- История -->
-            <button class="nav-item active" data-section="history">
-                <span class="nav-short">Ис</span>
-                <span class="nav-label">История</span>
-                <button class="nav-collapse" id="navCollapse" title="Свернуть" aria-label="Свернуть панель">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M15 18l-6-6 6-6"></path>
-                    </svg>
-                </button>
-            </button>
-            <!-- Избранное -->
-            <button class="nav-item" data-section="favorites">
-                <span class="nav-short">Из</span>
-                <span class="nav-label">Избранное</span>
-            </button>
-            <!-- Словарь -->
-            <button class="nav-item" data-section="dictionary">
-                <span class="nav-short">Сл</span>
-                <span class="nav-label">Словарь</span>
-            </button>
-        </nav>
-        <div class="sidebar-divider"></div>
-        <div class="sidebar-list" id="sidebarList"></div>
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <svg viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>
+        </div>
+
+        <button class="nav-btn active" title="Переводчик" id="navTranslate">
+            <svg viewBox="0 0 24 24"><path d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 0 1 6.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg>
+        </button>
+
+        <button class="nav-btn" title="История" id="navHistory">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </button>
+
+        <button class="nav-btn" title="Избранное" id="navFavorites">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </button>
+
+        <div class="nav-spacer"></div>
+
+        <button class="nav-btn" title="Настройки">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
     </aside>
 
-    <!-- ── Основной контент ── -->
-    <div class="app-main">
+    <!-- ── App body ── -->
+    <div class="app-body">
+
+        <!-- Header -->
         <header>
-            <div>
-                <div class="logo">Über<span>setzer</span></div>
-                <div class="subtitle">Deutsch · Russisch — Переводчик</div>
+            <div class="header-logo">Über<span>setzer</span></div>
+
+            <div class="header-langs">
+                <button class="lang-btn" id="sourceLangBtn">
+                    <span id="sourceLangLabel">Немецкий</span>
+                    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+
+                <button class="swap-btn" id="swapBtn" title="Сменить направление">
+                    <svg viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"></path></svg>
+                </button>
+
+                <button class="lang-btn" id="targetLangBtn">
+                    <span id="targetLangLabel">Русский</span>
+                    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+            </div>
+
+            <div class="header-actions">
+                <button class="hdr-btn" title="Тёмная тема">
+                    <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+                <button class="hdr-btn" title="Профиль">
+                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </button>
             </div>
         </header>
 
-        <main class="main">
-            <section class="workspace">
-                <div class="top-bar">
-                    <div class="badge" id="sourceBadge">DE</div>
-                    <button class="swap-btn" id="swapBtn" title="Сменить направление" aria-label="Сменить направление">
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M4 8h13"></path><path d="m13 4 4 4-4 4"></path>
-                            <path d="M20 16H7"></path><path d="m11 12-4 4 4 4"></path>
-                        </svg>
-                    </button>
-                    <div class="badge" id="targetBadge">RU</div>
-                </div>
+        <!-- Content -->
+        <div class="content">
 
-                <div class="panels">
-                    <section class="panel">
-                        <div class="panel-head">
-                            <div class="panel-title">оригинал</div>
-                            <div class="panel-tools">
-                                <button class="icon-btn" id="copySourceBtn" title="Копировать" aria-label="Копировать оригинал">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <rect x="9" y="9" width="11" height="11" rx="2"></rect>
-                                        <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"></path>
-                                    </svg>
-                                </button>
-                                <button class="icon-btn" id="voiceBtn" title="Голосовой ввод" aria-label="Голосовой ввод">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 1 1-6 0V6a3 3 0 0 1 3-3z"></path>
-                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                                        <path d="M12 19v3"></path><path d="M8 22h8"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="panel-scroll" id="sourceScroll">
-                            <div class="editor" id="sourceEditor" contenteditable="true" spellcheck="false"
-                                data-placeholder="Введите текст для перевода..."></div>
-                        </div>
-                    </section>
-
-                    <section class="panel">
-                        <div class="panel-head">
-                            <div class="panel-title">перевод</div>
-                            <div class="panel-tools" id="targetTools">
-                                <button class="icon-btn hidden" id="favBtn" title="В избранное" aria-label="Добавить в избранное">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                    </svg>
-                                </button>
-                                <button class="icon-btn hidden" id="copyTargetBtn" title="Копировать" aria-label="Копировать перевод">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <rect x="9" y="9" width="11" height="11" rx="2"></rect>
-                                        <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"></path>
-                                    </svg>
-                                </button>
-                                <button class="icon-btn hidden" id="speakBtn" title="Озвучить" aria-label="Озвучить перевод">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M11 5 6 9H3v6h3l5 4V5z"></path>
-                                        <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
-                                        <path d="M18.5 5.5a9 9 0 0 1 0 13"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="panel-scroll" id="targetScroll">
-                            <div class="skeleton" id="skeleton">
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line"></div>
-                            </div>
-                            <div class="translation-output empty" id="translationOutput">Перевод появится здесь...</div>
-                        </div>
-                    </section>
-                </div>
-
-                <div class="bottom-bar">
-                    <div id="charCount">0 символов</div>
-                    <div class="status">
-                        <span class="status-dot"></span>
-                        <span>синхронная прокрутка</span>
+            <!-- Translation panels -->
+            <div class="panels">
+                <!-- Source -->
+                <div class="panel">
+                    <div class="panel-top">
+                        <span class="panel-lang" id="sourcePanelLang">Немецкий</span>
+                        <button class="panel-clear" id="clearBtn" title="Очистить">
+                            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                    <div class="panel-body">
+                        <div class="editor" id="sourceEditor" contenteditable="true" spellcheck="false"
+                            data-placeholder="Введите текст..."></div>
+                    </div>
+                    <div class="panel-bottom">
+                        <button class="icon-btn" id="speakSourceBtn" title="Озвучить">
+                            <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                        </button>
+                        <button class="icon-btn" id="voiceBtn" title="Голосовой ввод">
+                            <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                        </button>
+                        <button class="icon-btn" id="copySourceBtn" title="Копировать">
+                            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                        <span class="panel-char-count" id="charCount">0 / 5000</span>
                     </div>
                 </div>
-            </section>
 
+                <!-- Target -->
+                <div class="panel">
+                    <div class="panel-top">
+                        <span class="panel-lang" id="targetPanelLang">Русский</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="panel-skeleton" id="panelSkeleton">
+                            <div class="skel-line"></div>
+                            <div class="skel-line"></div>
+                        </div>
+                        <div class="translation-text empty" id="translationText">Перевод появится здесь...</div>
+                        <div class="translation-note hidden" id="translationNote"></div>
+                    </div>
+                    <div class="panel-bottom">
+                        <button class="icon-btn" id="speakTargetBtn" title="Озвучить">
+                            <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                        </button>
+                        <button class="icon-btn" id="copyTargetBtn" title="Копировать">
+                            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                        <button class="icon-btn" id="favBtn" title="В избранное">
+                            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Translate button -->
+            <div class="translate-row">
+                <button class="translate-btn" id="translateBtn">
+                    <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"></path></svg>
+                    Перевести
+                </button>
+            </div>
+
+            <!-- Error -->
             <div class="error-msg" id="errorMsg"></div>
-        </main>
+
+            <!-- Analysis -->
+            <div class="analysis" id="analysis"></div>
+
+        </div>
     </div>
 </div>
 
 <script>
+    /* ── DOM refs ─────────────────────────────── */
     const sourceEditor    = document.getElementById('sourceEditor');
-    const translationOutput = document.getElementById('translationOutput');
-    const sourceBadge     = document.getElementById('sourceBadge');
-    const targetBadge     = document.getElementById('targetBadge');
-    const swapBtn         = document.getElementById('swapBtn');
-    const copySourceBtn   = document.getElementById('copySourceBtn');
-    const copyTargetBtn   = document.getElementById('copyTargetBtn');
-    const speakBtn        = document.getElementById('speakBtn');
-    const voiceBtn        = document.getElementById('voiceBtn');
-    const favBtn          = document.getElementById('favBtn');
-    const sourceScroll    = document.getElementById('sourceScroll');
-    const targetScroll    = document.getElementById('targetScroll');
-    const skeleton        = document.getElementById('skeleton');
+    const translationText = document.getElementById('translationText');
+    const translationNote = document.getElementById('translationNote');
+    const panelSkeleton   = document.getElementById('panelSkeleton');
     const charCount       = document.getElementById('charCount');
     const errorMsg        = document.getElementById('errorMsg');
-    const sidebar         = document.getElementById('sidebar');
-    const sidebarList     = document.getElementById('sidebarList');
-    const navCollapse     = document.getElementById('navCollapse');
+    const analysis        = document.getElementById('analysis');
+    const clearBtn        = document.getElementById('clearBtn');
+    const swapBtn         = document.getElementById('swapBtn');
+    const translateBtn    = document.getElementById('translateBtn');
+    const speakSourceBtn  = document.getElementById('speakSourceBtn');
+    const speakTargetBtn  = document.getElementById('speakTargetBtn');
+    const voiceBtn        = document.getElementById('voiceBtn');
+    const copySourceBtn   = document.getElementById('copySourceBtn');
+    const copyTargetBtn   = document.getElementById('copyTargetBtn');
+    const favBtn          = document.getElementById('favBtn');
+    const sourceLangLabel = document.getElementById('sourceLangLabel');
+    const targetLangLabel = document.getElementById('targetLangLabel');
+    const sourcePanelLang = document.getElementById('sourcePanelLang');
+    const targetPanelLang = document.getElementById('targetPanelLang');
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    let direction          = 'de-ru';
-    let sourceText         = '';
-    let translatedText     = '';
-    let leftSentences      = [];
-    let rightSentences     = [];
-    let activeSentenceIndex = null;
-    let debounceTimer      = null;
-    let recognition        = null;
-    let isRecording        = false;
-    let syncingScroll      = false;
-    let requestCounter     = 0;
-    let activeSection      = 'history';
-    let currentHistoryId   = null;
+    /* ── State ────────────────────────────────── */
+    let direction       = 'de-ru';
+    let sourceText      = '';
+    let currentData     = null;
+    let debounceTimer   = null;
+    let requestCounter  = 0;
+    let isRecording     = false;
+    let recognition     = null;
+    let currentHistoryId = null;
+
+    const LANGS = {
+        'de-ru': { source: 'Немецкий', target: 'Русский', sourceLang: 'de-DE', targetLang: 'ru-RU' },
+        'ru-de': { source: 'Русский',  target: 'Немецкий', sourceLang: 'ru-RU', targetLang: 'de-DE' }
+    };
 
     /* ── Storage ──────────────────────────────── */
-
     function storageGet(key) {
         try { return JSON.parse(localStorage.getItem(key)) || []; }
         catch { return []; }
@@ -651,23 +872,24 @@
         catch {}
     }
 
-    function saveToHistory(text, result, dir) {
+    function saveToHistory(text, data, dir) {
         const list = storageGet('ub_history');
-        list.unshift({ id: Date.now(), text, result, dir, ts: Date.now() });
+        const id = Date.now();
+        list.unshift({ id, text, data, dir, ts: id });
         storageSet('ub_history', list.slice(0, 50));
-        if (activeSection === 'history') renderSidebarSection('history');
+        currentHistoryId = id;
+        updateFavBtn();
     }
 
     function isSingleWord(text) {
         return text.trim().split(/\s+/).length === 1;
     }
 
-    function saveToDict(text, result) {
+    function saveToDict(text, data) {
         const list = storageGet('ub_dictionary');
         if (list.some(i => i.text.toLowerCase() === text.toLowerCase())) return;
-        list.unshift({ id: Date.now(), text, result, ts: Date.now() });
+        list.unshift({ id: Date.now(), text, data, ts: Date.now() });
         storageSet('ub_dictionary', list.slice(0, 200));
-        if (activeSection === 'dictionary') renderSidebarSection('dictionary');
     }
 
     function isFavorited(id) {
@@ -678,131 +900,32 @@
         const item = storageGet('ub_history').find(i => i.id === id)
                   || storageGet('ub_favorites').find(i => i.id === id);
         if (!item) return;
-
         const favs = storageGet('ub_favorites');
         const idx  = favs.findIndex(i => i.id === id);
         if (idx === -1) favs.unshift({ ...item });
         else            favs.splice(idx, 1);
         storageSet('ub_favorites', favs.slice(0, 100));
-
-        renderSidebarSection(activeSection);
         updateFavBtn();
     }
 
-    /* ── Sidebar UI ───────────────────────────── */
-
-    function collapseSidebar() {
-        sidebar.classList.add('collapsed');
-    }
-
-    function expandSidebar() {
-        sidebar.classList.remove('collapsed');
-    }
-
-    function setActiveSection(section) {
-        activeSection = section;
-        document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.section === section);
-        });
-        renderSidebarSection(section);
-        expandSidebar();
-    }
-
-    function formatDate(ts) {
-        const d   = new Date(ts);
-        const now = new Date();
-        if (d.toDateString() === now.toDateString()) {
-            return d.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
-        }
-        return d.toLocaleDateString('ru', { day: 'numeric', month: 'short' });
-    }
-
-    function renderSidebarSection(section) {
-        const map      = { history: 'ub_history', favorites: 'ub_favorites', dictionary: 'ub_dictionary' };
-        const emptyMsg = { history: 'История пуста', favorites: 'Нет избранных', dictionary: 'Словарь пуст' };
-        const list     = storageGet(map[section]);
-
-        if (!list.length) {
-            sidebarList.innerHTML = `<div class="sidebar-empty">${emptyMsg[section]}</div>`;
-            return;
-        }
-
-        sidebarList.innerHTML = list.map(item => {
-            const preview = (item.text || '').slice(0, 52) + (item.text.length > 52 ? '…' : '');
-            const meta    = formatDate(item.ts) + (item.dir ? ' · ' + item.dir : '');
-            const starred = (section !== 'dictionary' && isFavorited(item.id)) ? ' starred' : '';
-            const starBtn = section !== 'dictionary'
-                ? `<button class="sidebar-item-star${starred}" data-id="${item.id}" title="Избранное">★</button>`
-                : '';
-            return `<button class="sidebar-item" data-id="${item.id}" data-section="${section}">
-                        <span class="sidebar-item-text">${escapeHtml(preview)}</span>
-                        <span class="sidebar-item-meta">${escapeHtml(meta)}</span>
-                        ${starBtn}
-                    </button>`;
-        }).join('');
-    }
-
-    function loadItem(id, section) {
-        const map  = { history: 'ub_history', favorites: 'ub_favorites', dictionary: 'ub_dictionary' };
-        const item = storageGet(map[section]).find(i => i.id === id);
-        if (!item) return;
-
-        direction  = item.dir || 'de-ru';
-        sourceText = item.text;
-        translatedText = item.result;
-        updateDirectionUI();
-        sourceEditor.innerText = item.text;
-        renderSource();
-        renderTranslation();
-        updateCharCount();
-        currentHistoryId = id;
-        updateFavBtn();
-    }
-
-    /* ── Fav button ───────────────────────────── */
-
-    function updateFavBtn(id) {
-        if (id !== undefined) currentHistoryId = id;
-        if (!currentHistoryId) return;
-        favBtn.classList.toggle('fav-active', isFavorited(currentHistoryId));
-    }
-
-    /* ── Translation helpers ──────────────────── */
-
-    function getSourceLang() { return direction === 'de-ru' ? 'de-DE' : 'ru-RU'; }
-    function getTargetLang()  { return direction === 'de-ru' ? 'ru-RU' : 'de-DE'; }
-
-    function escapeHtml(text) {
-        return text
+    /* ── UI helpers ───────────────────────────── */
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    function splitIntoSentences(text) {
-        const normalized = text.replace(/\r/g, '').trim();
-        if (!normalized) return [];
-        const chunks = normalized.match(/[^.!?\n]+(?:[.!?]+|$)|[^\n]+/g) || [];
-        return chunks.map(c => c.replace(/\s+/g, ' ').trim()).filter(Boolean);
-    }
-
-    function setCaretToEnd(el) {
-        const range = document.createRange();
-        const sel   = window.getSelection();
-        range.selectNodeContents(el);
-        range.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }
-
-    function updateDirectionUI() {
-        sourceBadge.textContent = direction === 'de-ru' ? 'DE' : 'RU';
-        targetBadge.textContent = direction === 'de-ru' ? 'RU' : 'DE';
-        renderSource();
-        renderTranslation();
+    function updateLangLabels() {
+        const l = LANGS[direction];
+        sourceLangLabel.textContent = l.source;
+        targetLangLabel.textContent = l.target;
+        sourcePanelLang.textContent = l.source;
+        targetPanelLang.textContent = l.target;
     }
 
     function updateCharCount() {
-        charCount.textContent = `${sourceText.trim().length} символов`;
+        charCount.textContent = `${sourceText.trim().length} / 5000`;
     }
 
     function showError(msg) {
@@ -815,243 +938,282 @@
         errorMsg.textContent = '';
     }
 
-    function flashButton(btn) {
-        btn.style.background = 'var(--cream)';
-        btn.style.color = 'var(--ink)';
-        setTimeout(() => { btn.style.background = 'transparent'; btn.style.color = ''; }, 900);
+    function setLoading(on) {
+        panelSkeleton.classList.toggle('active', on);
+        translationText.classList.toggle('hidden', on);
+        translationNote.classList.toggle('hidden', true);
     }
 
-    function setTranslationLoading(isLoading) {
-        skeleton.classList.toggle('active', isLoading);
-        translationOutput.classList.toggle('hidden', isLoading);
+    function updateFavBtn() {
+        if (!currentHistoryId) return;
+        favBtn.classList.toggle('fav-on', isFavorited(currentHistoryId));
     }
 
-    function updateTargetActions() {
-        const has = Boolean(translatedText.trim());
-        favBtn.classList.toggle('hidden', !has);
-        copyTargetBtn.classList.toggle('hidden', !has);
-        speakBtn.classList.toggle('hidden', !has);
+    function flashBtn(btn) {
+        btn.style.color = 'var(--accent)';
+        setTimeout(() => btn.style.color = '', 700);
     }
 
-    function renderSource(preserveCaret = false) {
-        leftSentences = splitIntoSentences(sourceText);
-        if (!sourceText.trim()) { sourceEditor.innerHTML = ''; return; }
-
-        const html = leftSentences.length
-            ? leftSentences.map((s, i) => {
-                const a = i === activeSentenceIndex ? ' active' : '';
-                return `<span class="sentence left${a}" data-index="${i}">${escapeHtml(s)}</span>`;
-            }).join(' ')
-            : escapeHtml(sourceText);
-
-        sourceEditor.innerHTML = html;
-        if (preserveCaret && document.activeElement === sourceEditor) setCaretToEnd(sourceEditor);
-    }
-
-    function renderTranslation() {
-        rightSentences = splitIntoSentences(translatedText);
-        if (!translatedText.trim()) {
-            translationOutput.className = 'translation-output empty';
-            translationOutput.textContent = 'Перевод появится здесь...';
-            updateTargetActions();
-            return;
-        }
-
-        translationOutput.className = 'translation-output';
-        translationOutput.innerHTML = rightSentences.map((s, i) => {
-            const a = i === activeSentenceIndex ? ' active' : '';
-            return `<span class="sentence right${a}" data-index="${i}">${escapeHtml(s)}</span>`;
-        }).join(' ');
-
-        updateTargetActions();
-    }
-
-    function setActiveSentence(index) {
-        activeSentenceIndex = index;
-        document.querySelectorAll('.sentence.left').forEach(n =>
-            n.classList.toggle('active', Number(n.dataset.index) === index));
-        document.querySelectorAll('.sentence.right').forEach(n =>
-            n.classList.toggle('active', Number(n.dataset.index) === index));
-
-        const ln = sourceEditor.querySelector(`.sentence.left[data-index="${index}"]`);
-        const rn = translationOutput.querySelector(`.sentence.right[data-index="${index}"]`);
-        if (ln) ln.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        if (rn) rn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
-
-    function clearTranslation() {
-        translatedText   = '';
-        activeSentenceIndex = null;
+    function clearAll() {
+        sourceText = '';
+        sourceEditor.innerHTML = '';
+        currentData = null;
         currentHistoryId = null;
-        renderTranslation();
+        translationText.className = 'translation-text empty';
+        translationText.textContent = 'Перевод появится здесь...';
+        translationNote.classList.add('hidden');
+        analysis.classList.remove('visible');
+        analysis.innerHTML = '';
+        clearError();
+        updateCharCount();
+        favBtn.classList.remove('fav-on');
     }
 
-    function handleSourceInput() {
-        sourceText = sourceEditor.innerText.replace(/ /g, ' ');
-        updateCharCount();
-        clearError();
-        activeSentenceIndex = null;
+    /* ── Analysis render ──────────────────────── */
 
-        clearTimeout(debounceTimer);
-        if (!sourceText.trim()) {
-            sourceText = '';
-            sourceEditor.innerHTML = '';
-            clearTranslation();
-            return;
+    function typeLabel(type) {
+        const map = { verb: 'Глагол', noun: 'Существительное', adjective: 'Прилагательное', word: 'Слово', text: 'Текст' };
+        return map[type] || type;
+    }
+
+    function renderTypeBlock(data) {
+        return `<div class="block">
+            <div class="block-title">Тип + слово</div>
+            <div class="type-chip">${escapeHtml(typeLabel(data.type))}</div>
+            <div class="block-word">${escapeHtml(data.source || '')}</div>
+        </div>`;
+    }
+
+    function renderTranslationBlock(data) {
+        return `<div class="block">
+            <div class="block-title">Перевод</div>
+            <div class="block-translation">${escapeHtml(data.translation)}</div>
+            ${data.translation_note ? `<div class="block-note">${escapeHtml(data.translation_note)}</div>` : ''}
+        </div>`;
+    }
+
+    function renderExamplesBlock(examples) {
+        const items = examples.map((ex, i) => `
+            <div class="example-item">
+                <span class="example-num">${i + 1}.</span>
+                <div class="example-texts">
+                    <div class="example-de">${escapeHtml(ex.de)}</div>
+                    <div class="example-ru">${escapeHtml(ex.ru)}</div>
+                </div>
+                <button class="example-speak" data-text="${escapeHtml(ex.de)}" title="Озвучить">
+                    <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                </button>
+            </div>`).join('');
+        return `<div class="block">
+            <div class="block-title">Примеры (${examples.length})</div>
+            ${items}
+        </div>`;
+    }
+
+    function renderFormsBlock(forms) {
+        const rows = Object.entries(forms).map(([k, v]) =>
+            `<tr><td>${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('');
+        return `<div class="block">
+            <div class="block-title">Таблица форм</div>
+            <table class="forms-table">${rows}</table>
+        </div>`;
+    }
+
+    function renderSynonymsBlock(synonyms) {
+        const chips = synonyms.map(s => `<span class="chip">${escapeHtml(s)}</span>`).join('');
+        return `<div class="block">
+            <div class="block-title">Синонимы</div>
+            <div class="chips">${chips}</div>
+        </div>`;
+    }
+
+    function renderLinguisticBlock(note) {
+        return `<div class="block">
+            <div class="block-title">Лингвистические детали</div>
+            <div class="linguistic-text">${escapeHtml(note)}</div>
+        </div>`;
+    }
+
+    function renderNounBlock(data) {
+        return `<div class="block">
+            <div class="block-title">Грамматика</div>
+            <div class="noun-row">
+                ${data.gender ? `<div><div class="noun-field-label">Род</div><div class="noun-field-value">${escapeHtml(data.gender)}</div></div>` : ''}
+                ${data.plural ? `<div><div class="noun-field-label">Мн. число</div><div class="noun-field-value">${escapeHtml(data.plural)}</div></div>` : ''}
+            </div>
+        </div>`;
+    }
+
+    function renderAnalysis(data) {
+        if (!data) { analysis.classList.remove('visible'); return; }
+
+        const blocks = [];
+
+        if (data.type && data.type !== 'text') blocks.push(renderTypeBlock(data));
+        if (data.translation_note)             blocks.push(renderTranslationBlock(data));
+        if (data.examples?.length)             blocks.push(renderExamplesBlock(data.examples));
+        if (data.forms)                        blocks.push(renderFormsBlock(data.forms));
+        if (data.synonyms?.length)             blocks.push(renderSynonymsBlock(data.synonyms));
+        if (data.linguistic_note)              blocks.push(renderLinguisticBlock(data.linguistic_note));
+        if (data.gender || data.plural)        blocks.push(renderNounBlock(data));
+
+        if (blocks.length) {
+            analysis.innerHTML = blocks.join('');
+            analysis.classList.add('visible');
+        } else {
+            analysis.classList.remove('visible');
+        }
+    }
+
+    /* ── Translation ──────────────────────────── */
+
+    function showTranslation(data) {
+        currentData = data;
+        translationText.className = 'translation-text';
+        translationText.textContent = data.translation || '';
+        translationText.classList.remove('hidden');
+
+        if (data.translation_note) {
+            translationNote.textContent = data.translation_note;
+            translationNote.classList.remove('hidden');
+        } else {
+            translationNote.classList.add('hidden');
         }
 
-        debounceTimer = setTimeout(() => requestTranslation(sourceText.trim()), 900);
+        renderAnalysis(data);
     }
 
     async function requestTranslation(text) {
-        const requestId = ++requestCounter;
-        setTranslationLoading(true);
+        const reqId = ++requestCounter;
+        setLoading(true);
         clearError();
 
         try {
-            const response = await fetch('/api/translate', {
+            const res  = await fetch('/api/translate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text, direction })
             });
 
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.detail || data.error?.message || 'Ошибка перевода.');
-            if (requestId !== requestCounter) return;
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.detail || 'Ошибка перевода');
+            if (reqId !== requestCounter) return;
 
-            translatedText = data.result || '';
-            activeSentenceIndex = null;
-            renderSource();
-            renderTranslation();
+            showTranslation(json.result);
+            saveToHistory(text, json.result, direction);
 
-            saveToHistory(text, translatedText, direction);
-            const last = storageGet('ub_history')[0];
-            currentHistoryId = last ? last.id : null;
-            updateFavBtn();
-
-            if (direction === 'de-ru' && isSingleWord(text)) saveToDict(text, translatedText);
-
-        } catch (error) {
-            if (requestId !== requestCounter) return;
-            translatedText = '';
-            renderTranslation();
-            showError('Ошибка: ' + (error.message || 'Не удалось выполнить перевод.'));
+            if (direction === 'de-ru' && isSingleWord(text)) {
+                saveToDict(text, json.result);
+            }
+        } catch (err) {
+            if (reqId !== requestCounter) return;
+            translationText.className = 'translation-text empty';
+            translationText.textContent = 'Перевод появится здесь...';
+            analysis.classList.remove('visible');
+            showError('Ошибка: ' + (err.message || 'Не удалось выполнить перевод.'));
         } finally {
-            if (requestId === requestCounter) setTranslationLoading(false);
+            if (reqId === requestCounter) setLoading(false);
         }
     }
 
-    function syncScroll(from, to) {
-        if (syncingScroll) return;
-        syncingScroll = true;
-        const mf = from.scrollHeight - from.clientHeight;
-        const mt = to.scrollHeight - to.clientHeight;
-        to.scrollTop = mf > 0 ? (from.scrollTop / mf) * (mt > 0 ? mt : 0) : 0;
-        requestAnimationFrame(() => { syncingScroll = false; });
+    function handleInput() {
+        sourceText = sourceEditor.innerText.replace(/ /g, ' ');
+        updateCharCount();
+        clearError();
+
+        clearTimeout(debounceTimer);
+        if (!sourceText.trim()) { clearAll(); return; }
+
+        debounceTimer = setTimeout(() => requestTranslation(sourceText.trim()), 900);
     }
 
-    function toggleVoiceInput() {
+    /* ── Speech ───────────────────────────────── */
+
+    function speak(text, lang) {
+        if (!window.speechSynthesis) { showError('Озвучивание не поддерживается.'); return; }
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = lang;
+        window.speechSynthesis.speak(u);
+    }
+
+    function toggleVoice() {
         if (!SpeechRecognition) { showError('Голосовой ввод не поддерживается.'); return; }
         if (isRecording && recognition) { recognition.stop(); return; }
 
         recognition = new SpeechRecognition();
-        recognition.lang = getSourceLang();
+        recognition.lang = LANGS[direction].sourceLang;
         recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
 
-        recognition.onstart  = () => { isRecording = true; voiceBtn.classList.add('recording'); clearError(); };
+        recognition.onstart  = () => { isRecording = true; voiceBtn.classList.add('active'); };
         recognition.onresult = e  => {
             sourceText = Array.from(e.results).map(r => r[0].transcript).join('').trim();
-            renderSource(true);
+            sourceEditor.innerText = sourceText;
             updateCharCount();
         };
-        recognition.onerror  = e  => { if (e.error !== 'aborted') showError('Ошибка голосового ввода: ' + e.error); };
-        recognition.onend    = () => { isRecording = false; voiceBtn.classList.remove('recording'); recognition = null; handleSourceInput(); };
+        recognition.onerror  = e  => { if (e.error !== 'aborted') showError('Ошибка: ' + e.error); };
+        recognition.onend    = () => {
+            isRecording = false;
+            voiceBtn.classList.remove('active');
+            recognition = null;
+            if (sourceText.trim()) requestTranslation(sourceText.trim());
+        };
         recognition.start();
-    }
-
-    function speakTranslation() {
-        if (!translatedText.trim()) return;
-        if (!window.speechSynthesis) { showError('Озвучивание не поддерживается.'); return; }
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(translatedText);
-        u.lang = getTargetLang();
-        window.speechSynthesis.speak(u);
     }
 
     /* ── Events ───────────────────────────────── */
 
-    sourceEditor.addEventListener('input', handleSourceInput);
-    sourceEditor.addEventListener('paste', () => requestAnimationFrame(handleSourceInput));
+    sourceEditor.addEventListener('input', handleInput);
+    sourceEditor.addEventListener('paste', () => requestAnimationFrame(handleInput));
 
-    sourceEditor.addEventListener('click', e => {
-        const s = e.target.closest('.sentence.left');
-        if (s) setActiveSentence(Number(s.dataset.index));
+    clearBtn.addEventListener('click', clearAll);
+
+    translateBtn.addEventListener('click', () => {
+        if (sourceText.trim()) requestTranslation(sourceText.trim());
     });
-
-    translationOutput.addEventListener('click', e => {
-        const s = e.target.closest('.sentence.right');
-        if (s) setActiveSentence(Number(s.dataset.index));
-    });
-
-    sourceScroll.addEventListener('scroll', () => syncScroll(sourceScroll, targetScroll));
-    targetScroll.addEventListener('scroll', () => syncScroll(targetScroll, sourceScroll));
 
     swapBtn.addEventListener('click', () => {
         direction = direction === 'de-ru' ? 'ru-de' : 'de-ru';
-        updateDirectionUI();
-        if (sourceText.trim()) requestTranslation(sourceText);
+        updateLangLabels();
+        if (sourceText.trim()) requestTranslation(sourceText.trim());
     });
 
     copySourceBtn.addEventListener('click', async () => {
         if (!sourceText.trim()) return;
         await navigator.clipboard.writeText(sourceText);
-        flashButton(copySourceBtn);
+        flashBtn(copySourceBtn);
     });
 
     copyTargetBtn.addEventListener('click', async () => {
-        if (!translatedText.trim()) return;
-        await navigator.clipboard.writeText(translatedText);
-        flashButton(copyTargetBtn);
+        if (!currentData?.translation) return;
+        await navigator.clipboard.writeText(currentData.translation);
+        flashBtn(copyTargetBtn);
     });
 
-    voiceBtn.addEventListener('click', toggleVoiceInput);
-    speakBtn.addEventListener('click', speakTranslation);
+    speakSourceBtn.addEventListener('click', () => {
+        if (sourceText.trim()) speak(sourceText, LANGS[direction].sourceLang);
+    });
+
+    speakTargetBtn.addEventListener('click', () => {
+        if (currentData?.translation) speak(currentData.translation, LANGS[direction].targetLang);
+    });
+
+    voiceBtn.addEventListener('click', toggleVoice);
 
     favBtn.addEventListener('click', () => {
         if (!currentHistoryId) return;
         toggleFavorite(currentHistoryId);
     });
 
-    /* кнопка ◀ — только она, не всплывает на nav-item */
-    navCollapse.addEventListener('click', e => {
-        e.stopPropagation();
-        collapseSidebar();
-    });
-
-    /* клик на nav-item: раскрыть + переключить раздел */
-    document.querySelectorAll('.nav-item').forEach(btn => {
-        btn.addEventListener('click', () => setActiveSection(btn.dataset.section));
-    });
-
-    /* клик на список: загрузить запись или переключить звёздочку */
-    sidebarList.addEventListener('click', e => {
-        const star = e.target.closest('.sidebar-item-star');
-        if (star) {
-            e.stopPropagation();
-            toggleFavorite(Number(star.dataset.id));
-            return;
-        }
-        const item = e.target.closest('.sidebar-item');
-        if (item) loadItem(Number(item.dataset.id), item.dataset.section);
+    /* пример — кнопка озвучки */
+    analysis.addEventListener('click', e => {
+        const btn = e.target.closest('.example-speak');
+        if (btn) speak(btn.dataset.text, LANGS[direction].sourceLang);
     });
 
     /* ── Init ─────────────────────────────────── */
-
-    updateDirectionUI();
+    updateLangLabels();
     updateCharCount();
-    renderTranslation();
-    renderSidebarSection('history');
 </script>
 </body>
 </html>

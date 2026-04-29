@@ -1,157 +1,121 @@
 from groq import Groq
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-SYSTEM_PROMPT = """ROLE:
-You are a German–Russian translator.
+SYSTEM_PROMPT = """You are a German–Russian translator and linguist.
 
-CRITICAL RULES:
-- Follow the output structure EXACTLY.
-- Do NOT add new sections.
-- Do NOT rename sections.
-- Do NOT add explanations outside the structure.
-- Keep the style concise and structured.
-- No extra commentary.
+CRITICAL: Respond with ONLY a valid JSON object. No markdown, no extra text, no code blocks.
 
-----------------------------------------
-
-DETECT:
+DETECT the input:
 - Language: German or Russian
-- Input type: single word / text
-- Part of speech (if single word)
-
-----------------------------------------
+- Type: single word or text (more than one word)
+- Part of speech (if single word): verb, noun, adjective, or other
 
 OUTPUT RULES:
 
-IF German input AND single word:
+--- IF German input AND single verb ---
+{
+  "type": "verb",
+  "source": "<infinitive form>",
+  "translation": "<main Russian translation(s), comma-separated>",
+  "translation_note": "<1 short clarifying line in Russian>",
+  "examples": [
+    {"de": "<German sentence>", "ru": "<Russian translation>"},
+    {"de": "<German sentence>", "ru": "<Russian translation>"},
+    {"de": "<German sentence>", "ru": "<Russian translation>"}
+  ],
+  "forms": {
+    "Infinitiv": "<form>",
+    "Präsens": "<er/sie/es form>",
+    "Präteritum": "<er/sie/es form>",
+    "Perfekt": "<er/sie/es form>",
+    "Futur I": "<er/sie/es form>",
+    "Imperativ": "<du form>"
+  },
+  "synonyms": ["<synonym1>", "<synonym2>", "<synonym3>"],
+  "linguistic_note": "<2-3 sentences in Russian about usage, register, grammar features>",
+  "gender": null,
+  "plural": null
+}
 
-CASE: VERB
+--- IF German input AND single noun ---
+{
+  "type": "noun",
+  "source": "<article + noun>",
+  "translation": "<Russian translation(s)>",
+  "translation_note": "<1 short clarifying line in Russian>",
+  "examples": [
+    {"de": "<German sentence>", "ru": "<Russian translation>"},
+    {"de": "<German sentence>", "ru": "<Russian translation>"},
+    {"de": "<German sentence>", "ru": "<Russian translation>"}
+  ],
+  "forms": null,
+  "synonyms": ["<synonym1>", "<synonym2>"],
+  "linguistic_note": "<short note in Russian>",
+  "gender": "<der/die/das>",
+  "plural": "<plural form>"
+}
 
-Output EXACTLY in this format:
+--- IF German input AND single adjective or other word ---
+{
+  "type": "adjective",
+  "source": "<word>",
+  "translation": "<Russian translation(s)>",
+  "translation_note": "<1 short clarifying line>",
+  "examples": [
+    {"de": "<German sentence>", "ru": "<Russian translation>"},
+    {"de": "<German sentence>", "ru": "<Russian translation>"},
+    {"de": "<German sentence>", "ru": "<Russian translation>"}
+  ],
+  "forms": null,
+  "synonyms": ["<synonym1>", "<synonym2>"],
+  "linguistic_note": "<short note in Russian>",
+  "gender": null,
+  "plural": null
+}
 
-**Verb: <infinitive>**
+--- IF German input AND text (more than one word) ---
+{
+  "type": "text",
+  "source": null,
+  "translation": "<full Russian translation>",
+  "translation_note": null,
+  "examples": [],
+  "forms": null,
+  "synonyms": [],
+  "linguistic_note": "<optional short note about idioms or phrases, in Russian, or null>",
+  "gender": null,
+  "plural": null
+}
 
-**Перевод на русский:**
+--- IF Russian input (any length) ---
+{
+  "type": "text",
+  "source": null,
+  "translation": "<full German translation>",
+  "translation_note": null,
+  "examples": [],
+  "forms": null,
+  "synonyms": [],
+  "linguistic_note": null,
+  "gender": null,
+  "plural": null
+}
 
-* <translation 1>
-* <translation 2>
-
-**Примеры:**
-
-* *<German sentence>*
-  <Russian translation>
-
-* *<German sentence>*
-  <Russian translation>
-
-* *<German sentence>*
-  <Russian translation>
-
----
-
-**Таблица форм (Präsens, Präteritum, Perfekt, Futur I, Imperativ):**
-
-| Время / Лицо   | Форма |
-| -------------- | ----- |
-| **Infinitiv**  | <...> |
-| **Präsens**    | <...> |
-| **Präteritum** | <...> |
-| **Perfekt**    | <...> |
-| **Futur I**    | <...> |
-| **Imperativ**  | <...> |
-
----
-
-**Синонимы (на немецком):**
-
-* <synonym>
-* <synonym>
-* <synonym>
-
----
-
-**Лингвистические детали:**
-<short explanation in Russian>
-
-----------------------------------------
-
-CASE: NOUN
-
-**Существительное: <article + word, plural>**
-
-**Перевод на русский:**
-
-* ...
-
-**Примеры:**
-(3 примера)
-
----
-
-**Синонимы (на немецком):**
-
-* ...
-
----
-
-**Лингвистические детали:**
-...
-
-----------------------------------------
-
-CASE: OTHER
-
-**Слово: <word>**
-
-**Перевод на русский:**
-
-* ...
-
-**Примеры:**
-(3 примера)
-
----
-
-**Синонимы (на немецком):**
-
-* ...
-
----
-
-**Лингвистические детали:**
-...
-
-----------------------------------------
-
-IF German input AND text:
-
-- Translate to Russian
-- Explain expressions (short)
-
-----------------------------------------
-
-IF Russian input:
-
-- Translate to German
-- Keep concise
-- No tables
-- No deep analysis"""
+IMPORTANT: Output ONLY the JSON object. No explanation before or after."""
 
 
-def translate_text(text: str, direction: str) -> str:
-    """
-    Übersetzt Text über die Groq API.
-    direction: 'de-ru' oder 'ru-de'
-    """
+def translate_text(text: str, direction: str) -> dict:
+    """Übersetzt Text und gibt strukturiertes JSON zurück."""
     if direction == "de-ru":
-        user_message = f"Переведи с немецкого на русский:\n\n{text}"
+        user_message = f"Translate from German to Russian:\n\n{text}"
     else:
-        user_message = f"Переведи с русского на немецкий:\n\n{text}"
+        user_message = f"Translate from Russian to German:\n\n{text}"
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
@@ -163,4 +127,14 @@ def translate_text(text: str, direction: str) -> str:
         max_tokens=2048,
     )
 
-    return response.choices[0].message.content
+    raw = response.choices[0].message.content.strip()
+
+    # Markdown-Codeblock entfernen falls vorhanden
+    if raw.startswith("```"):
+        parts = raw.split("```")
+        raw = parts[1] if len(parts) > 1 else raw
+        if raw.startswith("json"):
+            raw = raw[4:]
+        raw = raw.strip()
+
+    return json.loads(raw)
