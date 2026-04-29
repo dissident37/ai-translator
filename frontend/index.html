@@ -683,6 +683,22 @@
 
         .hidden { display: none !important; }
 
+        /* ── Dunkles Farbschema ──────────────────── */
+        body.dark {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --border: #334155;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --accent-light: #1e3a5f;
+            --danger: #ef4444;
+        }
+        .theme-icon-sun             { display: none; }
+        body.dark .theme-icon-moon  { display: none; }
+        body.dark .theme-icon-sun   { display: block; }
+
         /* ── Verlaufsanzeige ─────────────────────── */
         .history-header {
             display: flex;
@@ -879,8 +895,9 @@
             </div>
 
             <div class="header-actions">
-                <button class="hdr-btn" title="Тёмная тема">
-                    <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <button class="hdr-btn" id="themeBtn" title="Тёмная тема">
+                    <svg class="theme-icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <svg class="theme-icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                 </button>
                 <button class="hdr-btn" title="Профиль">
                     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -969,6 +986,15 @@
                 <button class="history-clear-all" id="historyClearAll">Очистить всё</button>
             </div>
             <div id="historyList"></div>
+        </div>
+
+        <!-- Paneel für Favoriten -->
+        <div class="content" id="favoritesView" style="display:none">
+            <div class="history-header">
+                <h2 class="history-title">Избранное</h2>
+                <button class="history-clear-all" id="favClearAll">Очистить всё</button>
+            </div>
+            <div id="favList"></div>
         </div>
 
     </div>
@@ -1072,14 +1098,51 @@
         container.innerHTML = `<div class="history-items">${items}</div>`;
     }
 
+    function renderFavorites() {
+        const list      = storageGet('ub_favorites');
+        const container = document.getElementById('favList');
+        if (!container) return;
+        if (!list.length) {
+            container.innerHTML = `
+                <div class="history-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <div>Избранное пусто</div>
+                    <div style="font-size:12px;margin-top:4px">Нажмите ★ при переводе, чтобы сохранить</div>
+                </div>`;
+            return;
+        }
+        const dirLabel = { 'de-ru': 'DE → RU', 'ru-de': 'RU → DE' };
+        const items = list.map(entry => {
+            const src   = escapeHtml(entry.text || '');
+            const trans = escapeHtml((entry.data?.translation || '').split('\n')[0]);
+            const badge = dirLabel[entry.dir] || entry.dir;
+            const ts    = timeAgo(entry.ts);
+            return `
+                <div class="history-item" data-id="${entry.id}">
+                    <span class="history-dir-badge">${badge}</span>
+                    <div class="history-texts">
+                        <div class="history-source">${src}</div>
+                        <div class="history-translation">${trans}</div>
+                    </div>
+                    <div class="history-meta">
+                        <span class="history-ts">${ts}</span>
+                        <button class="history-delete fav-remove" data-id="${entry.id}" title="Убрать из избранного">★</button>
+                    </div>
+                </div>`;
+        }).join('');
+        container.innerHTML = `<div class="history-items">${items}</div>`;
+    }
+
     function showView(view) {
         currentView = view;
-        const isHistory = view === 'history';
-        document.getElementById('translateView').style.display = isHistory ? 'none' : '';
-        document.getElementById('historyView').style.display   = isHistory ? ''     : 'none';
-        document.getElementById('navTranslate').classList.toggle('active', !isHistory);
-        document.getElementById('navHistory').classList.toggle('active',    isHistory);
-        if (isHistory) renderHistory();
+        document.getElementById('translateView').style.display  = view === 'translate'  ? '' : 'none';
+        document.getElementById('historyView').style.display    = view === 'history'    ? '' : 'none';
+        document.getElementById('favoritesView').style.display  = view === 'favorites'  ? '' : 'none';
+        document.getElementById('navTranslate').classList.toggle('active', view === 'translate');
+        document.getElementById('navHistory').classList.toggle('active',   view === 'history');
+        document.getElementById('navFavorites').classList.toggle('active', view === 'favorites');
+        if (view === 'history')   renderHistory();
+        if (view === 'favorites') renderFavorites();
     }
 
     function saveToHistory(text, data, dir) {
@@ -1117,6 +1180,7 @@
         else            favs.splice(idx, 1);
         storageSet('ub_favorites', favs.slice(0, 100));
         updateFavBtn();
+        if (currentView === 'favorites') renderFavorites();
     }
 
     /* ── UI helpers ───────────────────────────── */
@@ -1459,9 +1523,54 @@
         renderHistory();
     });
 
+    /* ── Favoritennavigation ──────────────────── */
+    document.getElementById('navFavorites').addEventListener('click', () => showView('favorites'));
+
+    document.getElementById('favList').addEventListener('click', e => {
+        const delBtn = e.target.closest('.fav-remove');
+        if (delBtn) {
+            e.stopPropagation();
+            const id   = Number(delBtn.dataset.id);
+            const favs = storageGet('ub_favorites').filter(i => i.id !== id);
+            storageSet('ub_favorites', favs);
+            if (currentHistoryId === id) updateFavBtn();
+            renderFavorites();
+            return;
+        }
+        const item = e.target.closest('.history-item');
+        if (!item) return;
+        const entry = storageGet('ub_favorites').find(i => i.id === Number(item.dataset.id));
+        if (!entry?.data?.translation) return;
+
+        direction = entry.dir;
+        updateLangLabels();
+        sourceText = entry.text;
+        sourceEditor.innerText = entry.text;
+        updateCharCount();
+        currentData      = entry.data;
+        currentHistoryId = entry.id;
+        showTranslation(entry.data);
+        updateFavBtn();
+        showView('translate');
+    });
+
+    document.getElementById('favClearAll').addEventListener('click', () => {
+        if (!confirm('Удалить всё избранное?')) return;
+        storageSet('ub_favorites', []);
+        updateFavBtn();
+        renderFavorites();
+    });
+
+    /* ── Farbschema-Umschaltung ──────────────── */
+    document.getElementById('themeBtn').addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        localStorage.setItem('ub_theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+
     /* ── Init ─────────────────────────────────── */
     updateLangLabels();
     updateCharCount();
+    if (localStorage.getItem('ub_theme') === 'dark') document.body.classList.add('dark');
 </script>
 </body>
 </html>
