@@ -682,6 +682,149 @@
         }
 
         .hidden { display: none !important; }
+
+        /* ── Verlaufsanzeige ─────────────────────── */
+        .history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .history-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0;
+        }
+        .history-clear-all {
+            padding: 6px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: border-color .15s, color .15s;
+        }
+        .history-clear-all:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        .history-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .history-empty svg {
+            width: 40px;
+            height: 40px;
+            stroke: var(--border);
+            fill: none;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            display: block;
+            margin: 0 auto 12px;
+        }
+        .history-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .history-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .history-item:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+        }
+        .history-dir-badge {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #eff6ff;
+            color: var(--accent);
+            margin-top: 2px;
+            white-space: nowrap;
+        }
+        .dark .history-dir-badge {
+            background: #1e3a5f;
+        }
+        .history-texts {
+            flex: 1;
+            min-width: 0;
+        }
+        .history-source {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 3px;
+        }
+        .history-translation {
+            font-size: 13px;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .history-meta {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+        .history-ts {
+            font-size: 11px;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+        .history-delete {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 18px;
+            line-height: 1;
+            transition: background .12s, color .12s;
+        }
+        .history-delete:hover {
+            background: #fef2f2;
+            color: #ef4444;
+        }
+        .dark .history-delete:hover {
+            background: #450a0a;
+            color: #f87171;
+        }
+        @media (max-width: 768px) {
+            .history-item { padding: 10px 12px; gap: 8px; }
+            .history-dir-badge { font-size: 10px; padding: 2px 6px; }
+        }
     </style>
 </head>
 <body>
@@ -746,7 +889,7 @@
         </header>
 
         <!-- Content -->
-        <div class="content">
+        <div class="content" id="translateView">
 
             <!-- Translation panels -->
             <div class="panels">
@@ -818,6 +961,16 @@
             <div class="analysis" id="analysis"></div>
 
         </div>
+
+        <!-- Paneel für Übersetzungsverlauf -->
+        <div class="content" id="historyView" style="display:none">
+            <div class="history-header">
+                <h2 class="history-title">История переводов</h2>
+                <button class="history-clear-all" id="historyClearAll">Очистить всё</button>
+            </div>
+            <div id="historyList"></div>
+        </div>
+
     </div>
 </div>
 
@@ -855,6 +1008,7 @@
     let isRecording     = false;
     let recognition     = null;
     let currentHistoryId = null;
+    let currentView      = 'translate'; // 'translate' | 'history'
 
     const LANGS = {
         'de-ru': { source: 'Немецкий', target: 'Русский', sourceLang: 'de-DE', targetLang: 'ru-RU' },
@@ -872,6 +1026,62 @@
         catch {}
     }
 
+    /* ── Verlaufs-UI ──────────────────────────── */
+    function timeAgo(ts) {
+        const diff = Math.floor((Date.now() - ts) / 1000);
+        if (diff < 60)     return 'только что';
+        if (diff < 3600)   return Math.floor(diff / 60) + ' мин. назад';
+        if (diff < 86400)  return Math.floor(diff / 3600) + ' ч. назад';
+        if (diff < 172800) return 'вчера';
+        if (diff < 604800) return Math.floor(diff / 86400) + ' дн. назад';
+        return new Date(ts).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+    }
+
+    function renderHistory() {
+        const list      = storageGet('ub_history');
+        const container = document.getElementById('historyList');
+        if (!container) return;
+        if (!list.length) {
+            container.innerHTML = `
+                <div class="history-empty">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <div>История переводов пуста</div>
+                    <div style="font-size:12px;margin-top:4px">Выполните перевод, и он появится здесь</div>
+                </div>`;
+            return;
+        }
+        const dirLabel = { 'de-ru': 'DE → RU', 'ru-de': 'RU → DE' };
+        const items = list.map(entry => {
+            const src   = escapeHtml(entry.text || '');
+            const trans = escapeHtml((entry.data?.translation || '').split('\n')[0]);
+            const badge = dirLabel[entry.dir] || entry.dir;
+            const ts    = timeAgo(entry.ts);
+            return `
+                <div class="history-item" data-id="${entry.id}">
+                    <span class="history-dir-badge">${badge}</span>
+                    <div class="history-texts">
+                        <div class="history-source">${src}</div>
+                        <div class="history-translation">${trans}</div>
+                    </div>
+                    <div class="history-meta">
+                        <span class="history-ts">${ts}</span>
+                        <button class="history-delete" data-id="${entry.id}" title="Удалить">×</button>
+                    </div>
+                </div>`;
+        }).join('');
+        container.innerHTML = `<div class="history-items">${items}</div>`;
+    }
+
+    function showView(view) {
+        currentView = view;
+        const isHistory = view === 'history';
+        document.getElementById('translateView').style.display = isHistory ? 'none' : '';
+        document.getElementById('historyView').style.display   = isHistory ? ''     : 'none';
+        document.getElementById('navTranslate').classList.toggle('active', !isHistory);
+        document.getElementById('navHistory').classList.toggle('active',    isHistory);
+        if (isHistory) renderHistory();
+    }
+
     function saveToHistory(text, data, dir) {
         const list = storageGet('ub_history');
         const id = Date.now();
@@ -879,6 +1089,7 @@
         storageSet('ub_history', list.slice(0, 50));
         currentHistoryId = id;
         updateFavBtn();
+        if (currentView === 'history') renderHistory();
     }
 
     function isSingleWord(text) {
@@ -1209,6 +1420,43 @@
     analysis.addEventListener('click', e => {
         const btn = e.target.closest('.example-speak');
         if (btn) speak(btn.dataset.text, LANGS[direction].sourceLang);
+    });
+
+    /* ── Verlaufsnavigation ───────────────────── */
+    document.getElementById('navTranslate').addEventListener('click', () => showView('translate'));
+    document.getElementById('navHistory').addEventListener('click',   () => showView('history'));
+
+    document.getElementById('historyList').addEventListener('click', e => {
+        const delBtn = e.target.closest('.history-delete');
+        if (delBtn) {
+            e.stopPropagation();
+            const id   = Number(delBtn.dataset.id);
+            const list = storageGet('ub_history').filter(i => i.id !== id);
+            storageSet('ub_history', list);
+            renderHistory();
+            return;
+        }
+        const item = e.target.closest('.history-item');
+        if (!item) return;
+        const entry = storageGet('ub_history').find(i => i.id === Number(item.dataset.id));
+        if (!entry?.data?.translation) return;
+
+        direction = entry.dir;
+        updateLangLabels();
+        sourceText = entry.text;
+        sourceEditor.innerText = entry.text;
+        updateCharCount();
+        currentData      = entry.data;
+        currentHistoryId = entry.id;
+        showTranslation(entry.data);
+        updateFavBtn();
+        showView('translate');
+    });
+
+    document.getElementById('historyClearAll').addEventListener('click', () => {
+        if (!confirm('Удалить всю историю переводов?')) return;
+        storageSet('ub_history', []);
+        renderHistory();
     });
 
     /* ── Init ─────────────────────────────────── */
