@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1400" height="1980"
+     viewBox="0 0 1400 1980"
+     font-family="'Segoe UI', Arial, sans-serif">
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#555" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#7F77DD" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrow-teal" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#1D9E75" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       BACKGROUND
+  ═══════════════════════════════════════════════════════════ -->
+  <rect width="1400" height="1980" fill="#F8F9FA"/>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PAGE TITLE
+  ═══════════════════════════════════════════════════════════ -->
+  <rect x="40" y="20" width="1320" height="52" rx="10" fill="#26215C"/>
+  <text x="700" y="51" text-anchor="middle" font-size="20" font-weight="700"
+        fill="#EEEDFE" letter-spacing="0.5">Übersetzer · Übersetzungs-Workflow · UML-Aktivitätsdiagramm</text>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SECTION 1 — ÜBERSICHTSDIAGRAMM
+  ═══════════════════════════════════════════════════════════ -->
+
+  <!-- Section header -->
+  <rect x="40" y="92" width="1320" height="32" rx="6" fill="#3C3489"/>
+  <text x="60" y="113" font-size="13" font-weight="700" fill="#CECBF6">1 · Übersichtsdiagramm — Klassifizierung &amp; Routing</text>
+
+  <!-- Start node -->
+  <circle cx="700" cy="158" r="16" fill="#444"/>
+
+  <!-- INPUT -->
+  <line x1="700" y1="174" x2="700" y2="196" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <rect x="560" y="196" width="280" height="46" rx="8" fill="#E9ECEF" stroke="#ADB5BD" stroke-width="1"/>
+  <text x="700" y="215" text-anchor="middle" font-size="13" font-weight="600" fill="#343A40">Eingabe</text>
+  <text x="700" y="232" text-anchor="middle" font-size="11" fill="#6C757D">{ text, direction }</text>
+
+  <!-- Arrow → Decision 1 -->
+  <line x1="700" y1="242" x2="700" y2="272" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- DECISION 1: direction == ru-de? -->
+  <polygon points="700,272 800,310 700,348 600,310" fill="#FFF" stroke="#7F77DD" stroke-width="1.5"/>
+  <text x="700" y="305" text-anchor="middle" font-size="11" font-weight="600" fill="#3C3489">direction</text>
+  <text x="700" y="320" text-anchor="middle" font-size="11" font-weight="600" fill="#3C3489">== "ru-de"?</text>
+
+  <!-- YES → ru_de -->
+  <line x1="800" y1="310" x2="920" y2="310" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arrow-purple)"/>
+  <text x="858" y="302" text-anchor="middle" font-size="11" fill="#534AB7">Ja</text>
+  <rect x="920" y="287" width="140" height="46" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+  <text x="990" y="306" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">Prompt</text>
+  <text x="990" y="322" text-anchor="middle" font-size="12" fill="#534AB7">ru_de</text>
+
+  <!-- NO → Decision 2 -->
+  <line x1="700" y1="348" x2="700" y2="382" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="712" y="368" font-size="11" fill="#6C757D">Nein (DE)</text>
+
+  <!-- DECISION 2: Wortanzahl -->
+  <polygon points="700,382 820,424 700,466 580,424" fill="#FFF" stroke="#7F77DD" stroke-width="1.5"/>
+  <text x="700" y="417" text-anchor="middle" font-size="11" font-weight="600" fill="#3C3489">Anzahl</text>
+  <text x="700" y="432" text-anchor="middle" font-size="11" font-weight="600" fill="#3C3489">Wörter?</text>
+
+  <!-- 1 Wort → de_word -->
+  <line x1="580" y1="424" x2="380" y2="424" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arrow-purple)"/>
+  <text x="480" y="415" text-anchor="middle" font-size="11" fill="#534AB7">1 Wort</text>
+  <rect x="240" y="401" width="140" height="46" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+  <text x="310" y="420" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">Prompt</text>
+  <text x="310" y="436" text-anchor="middle" font-size="12" fill="#534AB7">de_word</text>
+
+  <!-- 2-30 → de_short -->
+  <line x1="700" y1="466" x2="700" y2="504" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arrow-purple)"/>
+  <text x="712" y="490" font-size="11" fill="#534AB7">2–30</text>
+  <rect x="580" y="504" width="240" height="46" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+  <text x="700" y="523" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">Prompt</text>
+  <text x="700" y="539" text-anchor="middle" font-size="12" fill="#534AB7">de_short  +  linguistic_note</text>
+
+  <!-- > 30 → de_long -->
+  <line x1="820" y1="424" x2="1020" y2="424" stroke="#7F77DD" stroke-width="1.2" marker-end="url(#arrow-purple)"/>
+  <text x="918" y="415" text-anchor="middle" font-size="11" fill="#534AB7">&gt; 30 Wörter</text>
+  <rect x="1020" y="401" width="140" height="46" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+  <text x="1090" y="420" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">Prompt</text>
+  <text x="1090" y="436" text-anchor="middle" font-size="12" fill="#534AB7">de_long</text>
+
+  <!-- All branches → LLM -->
+  <!-- de_word down -->
+  <path d="M310 447 L310 596 L640 596" fill="none" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <!-- de_short down -->
+  <line x1="700" y1="550" x2="700" y2="596" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <!-- de_long down -->
+  <path d="M1090 447 L1090 596 L760 596" fill="none" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <!-- ru_de down -->
+  <path d="M990 333 L990 570 L760 570 L760 596" fill="none" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- LLM CALL -->
+  <rect x="580" y="596" width="240" height="56" rx="8" fill="#FAECE7" stroke="#D85A30" stroke-width="1.2"/>
+  <text x="700" y="619" text-anchor="middle" font-size="13" font-weight="700" fill="#4A1B0C">Groq LLM API</text>
+  <text x="700" y="638" text-anchor="middle" font-size="11" fill="#712B13">llama-3.3-70b · Token-Logging</text>
+
+  <!-- Strip markdown -->
+  <line x1="700" y1="652" x2="700" y2="678" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <rect x="560" y="678" width="280" height="44" rx="8" fill="#E9ECEF" stroke="#ADB5BD" stroke-width="1"/>
+  <text x="700" y="697" text-anchor="middle" font-size="13" font-weight="600" fill="#343A40">_strip_markdown()</text>
+  <text x="700" y="712" text-anchor="middle" font-size="11" fill="#6C757D">Markdown-Fence defensiv entfernen</text>
+
+  <!-- JSON Output -->
+  <line x1="700" y1="722" x2="700" y2="748" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <rect x="520" y="748" width="360" height="56" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1.2"/>
+  <text x="700" y="771" text-anchor="middle" font-size="13" font-weight="700" fill="#04342C">JSON-Antwort</text>
+  <text x="700" y="790" text-anchor="middle" font-size="11" fill="#0F6E56">{ type, source, translation, examples, forms, synonyms, … }</text>
+
+  <!-- End node -->
+  <line x1="700" y1="804" x2="700" y2="828" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <circle cx="700" cy="844" r="16" fill="none" stroke="#444" stroke-width="2.5"/>
+  <circle cx="700" cy="844" r="10" fill="#444"/>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SECTION 2 — 4 SUBDIAGRAMME
+  ═══════════════════════════════════════════════════════════ -->
+
+  <rect x="40" y="888" width="1320" height="32" rx="6" fill="#3C3489"/>
+  <text x="60" y="909" font-size="13" font-weight="700" fill="#CECBF6">2 · Poddiagrамmy — interne Logik je Prompt-Typ</text>
+
+  <!-- ─────────────────────────────────────────────────────────
+       SUB 1 · de_word  (left column, top)
+  ───────────────────────────────────────────────────────── -->
+
+  <!-- Container -->
+  <rect x="50" y="936" width="630" height="510" rx="12" fill="#FFF" stroke="#7F77DD" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <!-- Sub-header -->
+  <rect x="50" y="936" width="630" height="38" rx="12" fill="#EEEDFE"/>
+  <rect x="50" y="956" width="630" height="18" fill="#EEEDFE"/>
+  <text x="365" y="961" text-anchor="middle" font-size="13" font-weight="700" fill="#3C3489">de_word — 1 deutsches Wort</text>
+
+  <!-- Input -->
+  <rect x="215" y="990" width="300" height="44" rx="8" fill="#E9ECEF" stroke="#ADB5BD" stroke-width="1"/>
+  <text x="365" y="1009" text-anchor="middle" font-size="12" font-weight="600" fill="#343A40">Eingabe: 1 Token</text>
+  <text x="365" y="1025" text-anchor="middle" font-size="11" fill="#6C757D">z.B. "laufen", "Hund", "schön"</text>
+
+  <line x1="365" y1="1034" x2="365" y2="1060" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <!-- POS detection -->
+  <rect x="195" y="1060" width="340" height="44" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+  <text x="365" y="1079" text-anchor="middle" font-size="12" font-weight="600" fill="#3C3489">Bestimmung der Wortart (POS)</text>
+  <text x="365" y="1095" text-anchor="middle" font-size="11" fill="#534AB7">verb / noun / adjective / other</text>
+
+  <!-- Branch horizontal line -->
+  <line x1="365" y1="1104" x2="365" y2="1126" stroke="#555" stroke-width="1"/>
+  <line x1="110" y1="1126" x2="620" y2="1126" stroke="#555" stroke-width="1"/>
+
+  <!-- 3 branch verticals -->
+  <line x1="145" y1="1126" x2="145" y2="1152" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="365" y1="1126" x2="365" y2="1152" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="585" y1="1126" x2="585" y2="1152" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="145" y="1145" text-anchor="middle" font-size="10" fill="#534AB7">verb</text>
+  <text x="365" y="1145" text-anchor="middle" font-size="10" fill="#534AB7">noun</text>
+  <text x="585" y="1145" text-anchor="middle" font-size="10" fill="#534AB7">adj/other</text>
+
+  <!-- VERB box -->
+  <rect x="65" y="1152" width="160" height="130" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+  <text x="145" y="1170" text-anchor="middle" font-size="12" font-weight="700" fill="#3C3489">Verb</text>
+  <text x="145" y="1186" text-anchor="middle" font-size="10" fill="#534AB7">translation_note: или null</text>
+  <text x="145" y="1200" text-anchor="middle" font-size="10" fill="#534AB7">examples: ×3</text>
+  <text x="145" y="1214" text-anchor="middle" font-size="10" fill="#534AB7">forms: 6 Formen</text>
+  <text x="145" y="1228" text-anchor="middle" font-size="10" fill="#534AB7">synonyms: 3</text>
+  <text x="145" y="1242" text-anchor="middle" font-size="10" fill="#534AB7">linguistic_note: 2–3 Sätze</text>
+  <text x="145" y="1256" text-anchor="middle" font-size="10" fill="#534AB7">gender/plural: null</text>
+
+  <!-- NOUN box -->
+  <rect x="275" y="1152" width="180" height="130" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+  <text x="365" y="1170" text-anchor="middle" font-size="12" font-weight="700" fill="#3C3489">Substantiv</text>
+  <text x="365" y="1186" text-anchor="middle" font-size="10" fill="#534AB7">translation_note: или null</text>
+  <text x="365" y="1200" text-anchor="middle" font-size="10" fill="#534AB7">examples: ×3</text>
+  <text x="365" y="1214" text-anchor="middle" font-size="10" fill="#534AB7">gender: der/die/das</text>
+  <text x="365" y="1228" text-anchor="middle" font-size="10" fill="#534AB7">plural: Pluralform</text>
+  <text x="365" y="1242" text-anchor="middle" font-size="10" fill="#534AB7">synonyms: 2</text>
+  <text x="365" y="1256" text-anchor="middle" font-size="10" fill="#534AB7">linguistic_note: 1 Satz</text>
+
+  <!-- ADJ box -->
+  <rect x="505" y="1152" width="160" height="130" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+  <text x="585" y="1170" text-anchor="middle" font-size="12" font-weight="700" fill="#3C3489">Adj./andere</text>
+  <text x="585" y="1186" text-anchor="middle" font-size="10" fill="#534AB7">translation_note: или null</text>
+  <text x="585" y="1200" text-anchor="middle" font-size="10" fill="#534AB7">examples: ×3</text>
+  <text x="585" y="1214" text-anchor="middle" font-size="10" fill="#534AB7">synonyms: 2 (adj) / [] (other)</text>
+  <text x="585" y="1228" text-anchor="middle" font-size="10" fill="#534AB7">linguistic_note: 1 Satz (adj)</text>
+  <text x="585" y="1242" text-anchor="middle" font-size="10" fill="#534AB7">linguistic_note: null (other)</text>
+  <text x="585" y="1256" text-anchor="middle" font-size="10" fill="#534AB7">forms/gender/plural: null</text>
+
+  <!-- Merge → output -->
+  <line x1="145" y1="1282" x2="145" y2="1340" stroke="#555" stroke-width="1"/>
+  <line x1="145" y1="1340" x2="365" y2="1340" stroke="#555" stroke-width="1"/>
+  <line x1="365" y1="1282" x2="365" y2="1340" stroke="#555" stroke-width="1"/>
+  <line x1="585" y1="1282" x2="585" y2="1340" stroke="#555" stroke-width="1"/>
+  <line x1="585" y1="1340" x2="365" y2="1340" stroke="#555" stroke-width="1"/>
+  <line x1="365" y1="1340" x2="365" y2="1358" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <!-- JSON output de_word -->
+  <rect x="115" y="1358" width="500" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1.2"/>
+  <text x="365" y="1380" text-anchor="middle" font-size="12" font-weight="700" fill="#04342C">JSON-Ausgabe (alle Felder)</text>
+  <text x="365" y="1398" text-anchor="middle" font-size="10" fill="#0F6E56">type · source · translation · translation_note · examples×3 · forms · synonyms · linguistic_note · gender · plural</text>
+
+  <!-- ─────────────────────────────────────────────────────────
+       SUB 2 · de_short  (right column, top)
+  ───────────────────────────────────────────────────────── -->
+
+  <rect x="720" y="936" width="630" height="480" rx="12" fill="#FFF" stroke="#7F77DD" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <rect x="720" y="936" width="630" height="38" rx="12" fill="#EEEDFE"/>
+  <rect x="720" y="956" width="630" height="18" fill="#EEEDFE"/>
+  <text x="1035" y="961" text-anchor="middle" font-size="13" font-weight="700" fill="#3C3489">de_short — kurzer Text (2–30 Wörter)</text>
+
+  <!-- Input -->
+  <rect x="885" y="990" width="300" height="44" rx="8" fill="#E9ECEF" stroke="#ADB5BD" stroke-width="1"/>
+  <text x="1035" y="1009" text-anchor="middle" font-size="12" font-weight="600" fill="#343A40">Eingabe: 2–30 Wörter</text>
+  <text x="1035" y="1025" text-anchor="middle" font-size="11" fill="#6C757D">z.B. "Ich gehe nach Hause"</text>
+
+  <line x1="1035" y1="1034" x2="1035" y2="1060" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <!-- Translate -->
+  <rect x="855" y="1060" width="360" height="44" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+  <text x="1035" y="1079" text-anchor="middle" font-size="12" font-weight="600" fill="#3C3489">Vollständige Übersetzung → RU</text>
+  <text x="1035" y="1095" text-anchor="middle" font-size="11" fill="#534AB7">type = "text" · source = null · translation_note = null</text>
+
+  <line x1="1035" y1="1104" x2="1035" y2="1136" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <!-- Decision diamond -->
+  <polygon points="1035,1136 1140,1176 1035,1216 930,1176" fill="#FFF" stroke="#7F77DD" stroke-width="1.5"/>
+  <text x="1035" y="1169" text-anchor="middle" font-size="11" font-weight="600" fill="#3C3489">Idiom /</text>
+  <text x="1035" y="1184" text-anchor="middle" font-size="11" font-weight="600" fill="#3C3489">Register?</text>
+
+  <!-- YES -->
+  <line x1="1140" y1="1176" x2="1260" y2="1176" stroke="#7F77DD" stroke-width="1" marker-end="url(#arrow-purple)"/>
+  <text x="1198" y="1167" text-anchor="middle" font-size="10" fill="#534AB7">Ja</text>
+  <rect x="1260" y="1154" width="72" height="44" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+  <text x="1296" y="1173" text-anchor="middle" font-size="10" font-weight="700" fill="#3C3489">linguistic</text>
+  <text x="1296" y="1187" text-anchor="middle" font-size="10" fill="#534AB7">_note</text>
+
+  <!-- NO -->
+  <line x1="1035" y1="1216" x2="1035" y2="1248" stroke="#555" stroke-width="1"/>
+  <text x="1047" y="1238" font-size="10" fill="#6C757D">Nein → null</text>
+
+  <!-- Merge YES + NO -->
+  <line x1="1296" y1="1198" x2="1296" y2="1280" stroke="#555" stroke-width="1"/>
+  <line x1="1296" y1="1280" x2="1035" y2="1280" stroke="#555" stroke-width="1"/>
+  <line x1="1035" y1="1248" x2="1035" y2="1280" stroke="#555" stroke-width="1"/>
+  <line x1="1035" y1="1280" x2="1035" y2="1302" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <!-- All-fields-null row -->
+  <rect x="760" y="1248" width="110" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="815" y="1268" text-anchor="middle" font-size="10" fill="#5F5E5A">examples: []</text>
+  <rect x="878" y="1248" width="110" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="933" y="1268" text-anchor="middle" font-size="10" fill="#5F5E5A">synonyms: []</text>
+
+  <!-- JSON output de_short -->
+  <rect x="775" y="1302" width="520" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1.2"/>
+  <text x="1035" y="1324" text-anchor="middle" font-size="12" font-weight="700" fill="#04342C">JSON-Ausgabe</text>
+  <text x="1035" y="1342" text-anchor="middle" font-size="10" fill="#0F6E56">translation · linguistic_note (или null) · translation_note: null · examples: [] · forms: null · synonyms: []</text>
+
+
+  <!-- ─────────────────────────────────────────────────────────
+       SUB 3 · de_long  (left column, bottom)
+  ───────────────────────────────────────────────────────── -->
+
+  <rect x="50" y="1440" width="630" height="370" rx="12" fill="#FFF" stroke="#7F77DD" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <rect x="50" y="1440" width="630" height="38" rx="12" fill="#EEEDFE"/>
+  <rect x="50" y="1460" width="630" height="18" fill="#EEEDFE"/>
+  <text x="365" y="1465" text-anchor="middle" font-size="13" font-weight="700" fill="#3C3489">de_long — langer Text (&gt; 30 Wörter)</text>
+
+  <rect x="215" y="1494" width="300" height="44" rx="8" fill="#E9ECEF" stroke="#ADB5BD" stroke-width="1"/>
+  <text x="365" y="1513" text-anchor="middle" font-size="12" font-weight="600" fill="#343A40">Eingabe: &gt; 30 Wörter</text>
+  <text x="365" y="1529" text-anchor="middle" font-size="11" fill="#6C757D">Absatz, Brief, Artikel …</text>
+
+  <line x1="365" y1="1538" x2="365" y2="1564" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <rect x="165" y="1564" width="400" height="56" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+  <text x="365" y="1585" text-anchor="middle" font-size="12" font-weight="700" fill="#3C3489">Nur vollständige Übersetzung</text>
+  <text x="365" y="1603" text-anchor="middle" font-size="11" fill="#534AB7">Kein Analyse-Schritt, keine Verzweigung</text>
+
+  <!-- All null fields -->
+  <line x1="365" y1="1620" x2="365" y2="1646" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <rect x="55" y="1646" width="130" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="120" y="1666" text-anchor="middle" font-size="10" fill="#5F5E5A">translation_note: null</text>
+  <rect x="195" y="1646" width="110" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="250" y="1666" text-anchor="middle" font-size="10" fill="#5F5E5A">examples: []</text>
+  <rect x="315" y="1646" width="110" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="370" y="1666" text-anchor="middle" font-size="10" fill="#5F5E5A">synonyms: []</text>
+  <rect x="435" y="1646" width="90" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="480" y="1666" text-anchor="middle" font-size="10" fill="#5F5E5A">forms: null</text>
+  <rect x="535" y="1646" width="130" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="600" y="1666" text-anchor="middle" font-size="10" fill="#5F5E5A">linguistic_note: null</text>
+
+  <line x1="365" y1="1676" x2="365" y2="1702" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <rect x="115" y="1702" width="500" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1.2"/>
+  <text x="365" y="1724" text-anchor="middle" font-size="12" font-weight="700" fill="#04342C">JSON-Ausgabe</text>
+  <text x="365" y="1742" text-anchor="middle" font-size="10" fill="#0F6E56">nur: type "text" + translation (vollständiger RU-Text)</text>
+
+
+  <!-- ─────────────────────────────────────────────────────────
+       SUB 4 · ru_de  (right column, bottom)
+  ───────────────────────────────────────────────────────── -->
+
+  <rect x="720" y="1440" width="630" height="370" rx="12" fill="#FFF" stroke="#1D9E75" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <rect x="720" y="1440" width="630" height="38" rx="12" fill="#E1F5EE"/>
+  <rect x="720" y="1460" width="630" height="18" fill="#E1F5EE"/>
+  <text x="1035" y="1465" text-anchor="middle" font-size="13" font-weight="700" fill="#04342C">ru_de — russischer Text (beliebige Länge)</text>
+
+  <rect x="885" y="1494" width="300" height="56" rx="8" fill="#E9ECEF" stroke="#ADB5BD" stroke-width="1"/>
+  <text x="1035" y="1516" text-anchor="middle" font-size="12" font-weight="600" fill="#343A40">Eingabe: direction == "ru-de"</text>
+  <text x="1035" y="1534" text-anchor="middle" font-size="11" fill="#6C757D">Länge beliebig</text>
+
+  <line x1="1035" y1="1550" x2="1035" y2="1576" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <rect x="785" y="1576" width="500" height="44" rx="8" fill="#E9ECEF" stroke="#ADB5BD" stroke-width="1"/>
+  <text x="1035" y="1595" text-anchor="middle" font-size="12" font-weight="600" fill="#343A40">Keine Klassifizierung nötig</text>
+  <text x="1035" y="1611" text-anchor="middle" font-size="11" fill="#6C757D">direction ist der einzige Trigger</text>
+
+  <line x1="1035" y1="1620" x2="1035" y2="1646" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <rect x="785" y="1646" width="500" height="56" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1.2"/>
+  <text x="1035" y="1668" text-anchor="middle" font-size="12" font-weight="700" fill="#04342C">Vollständige Übersetzung → Deutsch</text>
+  <text x="1035" y="1686" text-anchor="middle" font-size="11" fill="#0F6E56">forms / synonyms / examples — immer null / []</text>
+
+  <!-- All null fields -->
+  <line x1="1035" y1="1702" x2="1035" y2="1728" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <rect x="748" y="1728" width="130" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="813" y="1748" text-anchor="middle" font-size="10" fill="#5F5E5A">translation_note: null</text>
+  <rect x="886" y="1728" width="100" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="936" y="1748" text-anchor="middle" font-size="10" fill="#5F5E5A">examples: []</text>
+  <rect x="994" y="1728" width="100" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="1044" y="1748" text-anchor="middle" font-size="10" fill="#5F5E5A">synonyms: []</text>
+  <rect x="1102" y="1728" width="84" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="1144" y="1748" text-anchor="middle" font-size="10" fill="#5F5E5A">forms: null</text>
+  <rect x="1194" y="1728" width="140" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="1264" y="1748" text-anchor="middle" font-size="10" fill="#5F5E5A">linguistic_note: null</text>
+
+  <line x1="1035" y1="1758" x2="1035" y2="1784" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <rect x="785" y="1784" width="500" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1.2"/>
+  <text x="1035" y="1806" text-anchor="middle" font-size="12" font-weight="700" fill="#04342C">JSON-Ausgabe</text>
+  <text x="1035" y="1824" text-anchor="middle" font-size="10" fill="#0F6E56">nur: type "text" + translation (vollständiger DE-Text)</text>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LEGEND / FOOTER
+  ═══════════════════════════════════════════════════════════ -->
+  <rect x="40" y="1920" width="1320" height="44" rx="8" fill="#E9ECEF" stroke="#CED4DA" stroke-width="1"/>
+
+  <rect x="60" y="1934" width="16" height="16" rx="3" fill="#EEEDFE" stroke="#7F77DD" stroke-width="1"/>
+  <text x="82" y="1946" font-size="11" fill="#343A40">Prompt-Typ (DE)</text>
+
+  <rect x="220" y="1934" width="16" height="16" rx="3" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1"/>
+  <text x="242" y="1946" font-size="11" fill="#343A40">Prompt-Typ (RU)</text>
+
+  <rect x="380" y="1934" width="16" height="16" rx="3" fill="#FAECE7" stroke="#D85A30" stroke-width="1"/>
+  <text x="402" y="1946" font-size="11" fill="#343A40">LLM-Verarbeitung</text>
+
+  <rect x="540" y="1934" width="16" height="16" rx="3" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1"/>
+  <text x="562" y="1946" font-size="11" fill="#343A40">JSON-Ausgabe</text>
+
+  <rect x="680" y="1934" width="16" height="16" rx="3" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="702" y="1946" font-size="11" fill="#343A40">Leere Felder (null / [])</text>
+
+  <text x="1340" y="1946" text-anchor="end" font-size="10" fill="#6C757D">UML-Aktivitätsdiagramm · Übersetzer DE↔RU</text>
+
+</svg>

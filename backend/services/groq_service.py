@@ -62,7 +62,7 @@ def _classify(text: str, direction: str) -> str:
     if direction == "ru-de":
         return "ru_de"
     wc = len(text.split())
-    if wc == 1:
+    if wc <= 5:
         return "de_word"
     return "de_short" if wc <= 30 else "de_long"
 

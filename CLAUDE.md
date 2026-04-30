@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
+## Befehle
 
 ```bash
 # Abhängigkeiten installieren
@@ -20,7 +20,7 @@ python main.py
 
 Es gibt keine Tests und kein Linting-Setup.
 
-## Architecture
+## Architektur
 
 **Backend** (`backend/`): FastAPI-App, die das Frontend als statische Dateien ausliefert.
 
@@ -41,12 +41,12 @@ Es gibt keine Tests und kein Linting-Setup.
 
 Die Eingabe wird in Python klassifiziert (`_classify` in `groq_service.py`), dann wird einer von vier spezialisierten Prompts gewählt:
 
-| Schlüssel  | Bedingung                    | Inhalt des Prompts                                |
-|------------|------------------------------|---------------------------------------------------|
-| `de_word`  | DE, 1 Token                  | POS-Erkennung, Konjugation, Beispiele, Synonyme   |
-| `de_short` | DE, 2–30 Wörter              | Übersetzung + `linguistic_note` (Idiome/Register) |
-| `de_long`  | DE, > 30 Wörter              | Nur Übersetzung                                   |
-| `ru_de`    | `direction == "ru-de"`       | Nur Übersetzung ins Deutsche                      |
+| Schlüssel  | Bedingung              | Inhalt des Prompts                                |
+|------------|------------------------|---------------------------------------------------|
+| `de_word`  | DE, 1 Token            | POS-Erkennung, Konjugation, Beispiele, Synonyme   |
+| `de_short` | DE, 2–30 Wörter        | Übersetzung + `linguistic_note` (Idiome/Register) |
+| `de_long`  | DE, > 30 Wörter        | Nur Übersetzung                                   |
+| `ru_de`    | `direction == "ru-de"` | Nur Übersetzung ins Deutsche                      |
 
 **Prompts bearbeiten:** Sektionen `### [DE word]`, `### [DE short]` usw. in [backend/prompts/WORKFLOW.md](backend/prompts/WORKFLOW.md) anpassen. Der Codeblock (` ``` `) in jeder Sektion wird beim Serverstart als Prompt geladen — kein Python-Code ändern nötig.
 
@@ -80,7 +80,7 @@ Das `result`-Feld enthält einen JSON-String (kein Markdown), den der Frontend-J
 | `gender` | string \| null | `der`/`die`/`das`, nur bei Nomen |
 | `plural` | string \| null | Pluralform, nur bei Nomen |
 
-## Environment
+## Umgebung
 
 - `GROQ_API_KEY` — einzige erforderliche Umgebungsvariable (Groq-Konsole)
 - Keine Datenbank, kein persistenter Zustand außer dem Browser-`localStorage`

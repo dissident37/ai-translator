@@ -6,30 +6,45 @@
 INPUT
  ├─ direction == "ru-de"       → [RU→DE]    промт: ru_de
  └─ direction == "de-ru"
-     ├─ 1 токен (split)        → [DE word]  промт: de_word
-     ├─ 2–30 слов              → [DE short] промт: de_short
+     ├─ 1–5 слов               → [DE word]  промт: de_word
+     ├─ 6–30 слов              → [DE short] промт: de_short
      └─ > 30 слов              → [DE long]  промт: de_long
 ```
 
 **Пограничные случаи:**
-- `sich entscheiden` → 2 токена → de_short (нормально: переводится как возвратный глагол)
-- `Fußball-Weltmeisterschaft` → 1 токен → de_word (корректно: составное слово)
+- `sich entscheiden` → 2 слова → de_word (глагольная конструкция, получает словарную статью)
+- `wird ausgebaut` → 2 слова → de_word (Passiv, source = "ausbauen")
+- `hätte gemacht werden können` → 4 слова → de_word (Konjunktiv II Passiv)
+- `Fußball-Weltmeisterschaft` → 1 слово → de_word (корректно: составное слово)
 - Русский текст любой длины → ru_de
 
 ---
 
 ## Промты
 
-### [DE word] — одно немецкое слово
+### [DE word] — одно немецкое слово или глагольная конструкция (до 5 слов)
 
 ```
 You are a German–Russian linguist.
-Translate the given German word and output ONLY a valid JSON object. No markdown, no prose.
+The input is either a single German word or a short verbal construction (up to 5 words).
+Output ONLY a valid JSON object. No markdown, no prose.
 
-Detect part of speech and fill ALL fields:
+Verbal constructions include: reflexive verbs (sich entscheiden), Passiv (wird ausgebaut,
+wurde gemacht), Perfekt (hat gemacht, ist geworden), Konjunktiv II (würde gehen),
+modal+infinitive (kann kommen, muss arbeiten).
+
+For verbal constructions: treat them as the underlying base verb for all fields.
+  source   → infinitive of the base verb (e.g. "wird ausgebaut" → "ausbauen")
+  type     → "verb"
+  forms    → conjugation of the BASE verb (not the construction)
+  examples → show the construction itself in at least one example
+
+For all other input, detect part of speech normally.
+
+Fill ALL fields:
 
 type             → "verb" | "noun" | "adjective" | "other"
-source           → verb: infinitive; noun: article + noun (e.g. "der Hund"); adjective/other: bare word
+source           → verb: infinitive of base verb; noun: article + noun (e.g. "der Hund"); adjective/other: bare word
 translation      → Russian translation(s), comma-separated if multiple
 translation_note → 1-line clarification in Russian, or null
 examples         → [{de, ru}] × 3 usage examples
