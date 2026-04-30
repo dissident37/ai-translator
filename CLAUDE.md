@@ -26,7 +26,9 @@ Es gibt keine Tests und kein Linting-Setup.
 
 - [backend/main.py](backend/main.py) — Einstiegspunkt: CORS (alle Origins), statische Dateien aus `../frontend`, uvicorn ohne reload
 - [backend/routers/translate.py](backend/routers/translate.py) — `POST /api/translate`; validiert `text` (nicht leer) und `direction` (`de-ru` | `ru-de`), gibt HTTP 400 bei Fehler
-- [backend/services/groq_service.py](backend/services/groq_service.py) — Groq-Client; ruft `llama-3.3-70b-versatile` mit temperature 0.3, max 2048 Tokens auf; enthält den Systemprompt
+- [backend/services/groq_service.py](backend/services/groq_service.py) — Klassifiziert die Eingabe, wählt den passenden Prompt, ruft den Provider auf, loggt Token-Verbrauch
+- [backend/services/llm_provider.py](backend/services/llm_provider.py) — Abstrakte `LLMProvider`-Klasse + `GroqProvider`-Implementierung; um den Provider zu wechseln, nur `_provider` in `groq_service.py` tauschen
+- [backend/prompts/WORKFLOW.md](backend/prompts/WORKFLOW.md) — **Einzige Quelle der Wahrheit für alle Prompts**; enthält das Entscheidungsbaum-Diagramm und die vollständigen Prompt-Texte in benannten Sektionen
 
 **Frontend** (`frontend/index.html`): Einzelne HTML-Datei (~1220 Zeilen), kein Build-Schritt. Eingebettetes CSS und JS mit:
 - Automatische Übersetzung mit 900ms Debounce nach Eingabe (max. 5000 Zeichen)
@@ -34,6 +36,24 @@ Es gibt keine Tests und kein Linting-Setup.
 - Wörterbuch wird automatisch befüllt, wenn ein einzelnes deutsches Wort übersetzt wird
 - Spracherkennung (Web Speech API) und Sprachausgabe (`speechSynthesis`)
 - Race-Condition-Schutz über Request-Zähler (nur die neueste Antwort wird gerendert)
+
+## Prompt-System
+
+Die Eingabe wird in Python klassifiziert (`_classify` in `groq_service.py`), dann wird einer von vier spezialisierten Prompts gewählt:
+
+| Schlüssel  | Bedingung                    | Inhalt des Prompts                                |
+|------------|------------------------------|---------------------------------------------------|
+| `de_word`  | DE, 1 Token                  | POS-Erkennung, Konjugation, Beispiele, Synonyme   |
+| `de_short` | DE, 2–30 Wörter              | Übersetzung + `linguistic_note` (Idiome/Register) |
+| `de_long`  | DE, > 30 Wörter              | Nur Übersetzung                                   |
+| `ru_de`    | `direction == "ru-de"`       | Nur Übersetzung ins Deutsche                      |
+
+**Prompts bearbeiten:** Sektionen `### [DE word]`, `### [DE short]` usw. in [backend/prompts/WORKFLOW.md](backend/prompts/WORKFLOW.md) anpassen. Der Codeblock (` ``` `) in jeder Sektion wird beim Serverstart als Prompt geladen — kein Python-Code ändern nötig.
+
+**Token-Logging:** Jede Anfrage schreibt eine Zeile ins uvicorn-Log:
+```
+token_usage kind=de_word prompt=90 completion=320 total=410
+```
 
 ## API
 
@@ -43,30 +63,22 @@ POST /api/translate
 → { "result": "<JSON-String>" }
 ```
 
-Das `result`-Feld enthält einen JSON-String (kein Markdown), den der Frontend-JS parst. Das Groq-Modell gibt manchmal Markdown-Codeblöcke zurück — der Service bereinigt diese defensiv (siehe `groq_service.py` Zeilen 132–140).
+Das `result`-Feld enthält einen JSON-String (kein Markdown), den der Frontend-JS parst. Das Modell gibt manchmal Markdown-Codeblöcke zurück — `_strip_markdown()` in `groq_service.py` bereinigt diese defensiv.
 
-## Prompt-Logik und Antwortstruktur
-
-Der Systemprompt in [groq_service.py](backend/services/groq_service.py) klassifiziert die Eingabe und gibt immer ein JSON-Objekt mit folgenden Feldern zurück:
+## JSON-Antwortstruktur (alle Felder immer vorhanden)
 
 | Feld | Typ | Bedeutung |
 |---|---|---|
 | `type` | `"verb"` \| `"noun"` \| `"adjective"` \| `"other"` \| `"text"` | Erkannter Eingabetyp |
-| `source` | string \| null | Normalisierte Quellform (z.B. Infinitiv, Artikel+Nomen) |
+| `source` | string \| null | Normalisierte Quellform (Infinitiv, Artikel+Nomen, …) |
 | `translation` | string | Übersetzung |
-| `translation_note` | string \| null | Kurze russische Erläuterung zur Übersetzung |
-| `examples` | Array von `{de, ru}` | Verwendungsbeispiele (3 Stück bei Einzelwörtern) |
-| `forms` | object \| null | Konjugation (Verben: Infinitiv, Präsens, Präteritum, Perfekt, Futur I, Imperativ) |
-| `synonyms` | string[] | Synonyme |
-| `linguistic_note` | string \| null | Russische Anmerkung zu Register/Grammatik/Idiomatik |
-| `gender` | string \| null | Genus (nur Nomen: `der`/`die`/`das`) |
-| `plural` | string \| null | Pluralform (nur Nomen) |
-
-**Eingabetyp-Verhalten:**
-- **Einzelnes deutsches Verb**: volle Konjugationstabelle (`forms`), 3 Beispiele, Synonyme, linguistische Notiz
-- **Einzelnes deutsches Nomen**: Genus, Plural, 3 Beispiele, Synonyme
-- **Mehrwörtiger deutscher Text**: nur `translation` + optionale `linguistic_note`, alle anderen Felder null/leer
-- **Russische Eingabe (beliebige Länge)**: vereinfachter Modus — nur `type: "text"` und `translation`, keine Analyse
+| `translation_note` | string \| null | Kurze russische Erläuterung |
+| `examples` | `[{de, ru}]` | 3 Beispiele bei Einzelwörtern, sonst `[]` |
+| `forms` | object \| null | Konjugation nur bei Verben |
+| `synonyms` | string[] | Synonyme, sonst `[]` |
+| `linguistic_note` | string \| null | Anmerkung zu Register/Idiomatik |
+| `gender` | string \| null | `der`/`die`/`das`, nur bei Nomen |
+| `plural` | string \| null | Pluralform, nur bei Nomen |
 
 ## Environment
 
